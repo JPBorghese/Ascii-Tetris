@@ -1,6 +1,5 @@
 // Tetris.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
-#include "pch.h"
 #include <iostream>
 #include <Windows.h>
 #include <string>
@@ -42,7 +41,6 @@ struct tile {
 
 unsigned short randColor();
 unsigned short idToColor(int);
-void makeRandomPiece();
 void printUpdatedGrid();
 void printFullGrid();
 void showConsoleCursor(bool);
@@ -55,8 +53,10 @@ void createPiece(piece);
 void setNextGrid();
 void setPiece();
 void drawBoundaries();
-void drawHoldingPiece(piece, piece);
+void updateText();
+void drawHoldingPiece(piece, piece, int, int);
 void drawHoldingBox();
+void drawQueueBox();
 void makePiece(int, int, piece);
 void deletePiece(int, int);
 void rotatePieceCW();
@@ -65,9 +65,11 @@ void cls();
 bool getInput(input*);
 bool movePieceRight();
 bool movePieceLeft();
+piece randomPiece();
 
 static const HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
+const int queueLength = 3;
 const int charPixelSizeH = 14;
 const int charPixelSizeW = 7;
 const int boxW = 5;
@@ -76,32 +78,46 @@ const int gridW = 10; // the width of the grid (grid)
 const int gridH = 23;
 const int holdingBoxW = (boxW * 4) + 4; // the widht of the holding box (spaces)
 const int holdingBoxH = (boxH * 4);
+const int queueBoxW = holdingBoxW;
+const int queueBoxH = holdingBoxH * queueLength;
 const int blankID = -1;
-const int updatesPerSecond = 100;
-const int maxSpeed = 5;
-const int defaultSpeed = 30; // (100 / x)
+const int updatesPerSecond = 120;
+const int downSpeed = 5;
+const float speedStep = 4.6 * 2;
 
 input i = NONE;
 piece p = BLANK;
 piece holding = BLANK;
+piece pieceQueue[queueLength];
 
-int speed = 10;
+int actualSpeed, defaultSpeed;
 int timer = 0;
 int r = 0;
 int offsetY; // the offset of the main grid
 int offsetX;
 int offsetHoldingX; // the offset of the holding box
 int offsetHoldingY;
+int offsetQueueX;
+int offsetQueueY;
 int centerX;
 int centerY;
 int rowCleared;
+int linesCleared, prevLinesCleared;
+int lineTextPosX, lineTextPosY, level;
 
+unsigned int score;
+
+bool holdingUp;
 bool holdingDown;
 bool holdPiece;
 bool rotateCW;
 bool rotateCCW;
 bool pieceMoved;
 bool pieceSet;
+bool updatedHoldingPiece;
+bool endGame;
+
+float theorSpeed;
 
 unsigned char box = 219;
 
@@ -118,8 +134,18 @@ int main()
 
 START:
 
+	endGame = false;
+	score = 0;
+	linesCleared = 0;
+	prevLinesCleared = linesCleared;
+	level = 0;
+	defaultSpeed = 48 * 2;		// level 0 speed
+	theorSpeed = defaultSpeed;
+
 	drawBoundaries();
-	//drawHoldingBox();
+	drawHoldingBox();
+	drawQueueBox();
+	updateText();
 
 	for (int y = 0; y < gridH; y++) {  // initialize grids
 		for (int x = 0; x < gridW; x++) {
@@ -128,7 +154,20 @@ START:
 		}
 	}
 
+	// fill the pieceQueue
+	for (int k = 0; k < queueLength; k++) {
+		pieceQueue[k] = randomPiece();
+	}
+	
+	drawHoldingPiece(BLANK, pieceQueue[0], offsetQueueX + 2, offsetQueueY + boxH);
+	drawHoldingPiece(BLANK, pieceQueue[1], offsetQueueX + 2, offsetQueueY + boxH + holdingBoxH);
+	drawHoldingPiece(BLANK, pieceQueue[2], offsetQueueX + 2, offsetQueueY + boxH + (2 * holdingBoxH));
+
 	pieceSet = false;
+	updatedHoldingPiece = false;
+
+	// create Starting Piece
+	createPiece(randomPiece());
 
 	while (true) {
 		
@@ -136,12 +175,7 @@ START:
 		pieceMoved = false;
 		rowCleared = -1;
 
-		if (holdingDown) {
-			speed = maxSpeed;
-		}
-		else {
-			speed = defaultSpeed;
-		}
+		actualSpeed = holdingDown ? downSpeed : defaultSpeed;
 
 		if (rotateCW ^ rotateCCW) {
 			if (rotateCW)
@@ -160,47 +194,47 @@ START:
 				movePieceRight();
 				break;
 			case END:
-				goto STOP;
+				endGame = true;
 				break;
 			case RESTART:
 				cls();
 				goto START;
 				break;
 			case ONE:	// I
+				//drawHoldingPiece(p, I);
 				createPiece(I);
-				drawHoldingPiece(holding, I);
 				break;
 			case TWO:	// O
+				//drawHoldingPiece(p, O);
 				createPiece(O);
-				drawHoldingPiece(holding, O);
 				break;
 			case THREE:	// T
+				//drawHoldingPiece(p, T);
 				createPiece(T);
-				drawHoldingPiece(holding, T);
 				break;
 			case FOUR:	// S
+				//drawHoldingPiece(p, S);
 				createPiece(S);
-				drawHoldingPiece(holding, S);
 				break;
 			case FIVE:	// Z
+				//drawHoldingPiece(p, Z);
 				createPiece(Z);
-				drawHoldingPiece(holding, Z);
 				break;
 			case SIX:	// J
+				//drawHoldingPiece(p, J);
 				createPiece(J);
-				drawHoldingPiece(holding, J);
 				break;
 			case SEVEN:	// L
+				//drawHoldingPiece(p, L);
 				createPiece(L);
-				drawHoldingPiece(holding, L);
 				break;
 			}
 		} 
-		if (timer % speed == 0) {
+		if (timer % actualSpeed == 0) {
 			updateGrid();
 		}
 
-		if (holdPiece) {
+		if (holdPiece && !updatedHoldingPiece) {
 			// delete Current Piece
 			for (int y = 0; y < gridH; y++) {
 				for (int x = 0; x < gridW; x++) {
@@ -210,15 +244,29 @@ START:
 				}
 			}
 
+			drawHoldingPiece(holding, p, offsetHoldingX + 2, offsetHoldingY + boxH);
+
 			piece temp = holding;
 			holding = p;
 
 			if (temp == BLANK) {
-				makeRandomPiece();
+				createPiece(pieceQueue[0]);
+
+				piece newp = randomPiece();
+
+				drawHoldingPiece(pieceQueue[0], pieceQueue[1], offsetQueueX + 2, offsetQueueY + boxH);
+				drawHoldingPiece(pieceQueue[1], pieceQueue[2], offsetQueueX + 2, offsetQueueY + boxH + holdingBoxH);
+				drawHoldingPiece(pieceQueue[2], newp, offsetQueueX + 2, offsetQueueY + boxH + (2 * holdingBoxH));
+
+				pieceQueue[0] = pieceQueue[1];
+				pieceQueue[1] = pieceQueue[2];
+				pieceQueue[2] = newp;
 			}
 			else {
 				createPiece(temp);
 			}
+
+			updatedHoldingPiece = true;
 		}
 
 		// special print function for when a row is cleared
@@ -229,38 +277,100 @@ START:
 			printFullGrid();
 		}
 
+		if (endGame) {
+			break;
+		}
+
 		Sleep(1000 / updatesPerSecond);
 		timer++;
 	}
 
-STOP:
+	cout.flush();
+	cout << "Game Over";
+	cin.ignore();
+
 	return 0;
 }
 
-void drawHoldingPiece(piece oldPiece, piece newPiece) {
-	int xref = offsetHoldingX + (2 * boxW) + 2;
-	int yref = offsetHoldingY + boxH;
+void updateText() {
+	setConsoleColor(WHITE);
+	setCursorPos(lineTextPosX, lineTextPosY);
+	cout << "Lines : " << linesCleared;
+
+	setCursorPos(lineTextPosX, lineTextPosY + 2);
+	cout << "Level : " << level;
+
+	setCursorPos(lineTextPosX, lineTextPosY + 4);
+	cout << "Score : " << score;
+
+	/*
+	setCursorPos(lineTextPosX, lineTextPosY + 4);
+	cout << "Speed :" << theorSpeed;
+
+	setCursorPos(lineTextPosX, lineTextPosY + 6);
+	cout << "DefaultSpeed : " << defaultSpeed;
+	*/
+}
+
+void drawHoldingPiece(piece oldPiece, piece newPiece, int offsetx, int offsety) {
+	int xref = offsetx;
+	int yref = offsety;
 
 	switch (oldPiece) {
 	case I:
-		setConsoleColor(CYAN);
 		for (int x = 0; x < 4; x++) {
 			eraseBox(xref + (x * boxW), yref + 1);
 		}
 		break;
 	case O:
+		for (int x = 0; x < 2; x++) {
+			for (int y = 0; y < 2; y++) {
+				eraseBox(xref + boxW + (x * boxW), yref + (boxH * y));
+			}
+		}
+		break;
 	case T:
+		for (int x = 0; x < 3; x++) {
+			eraseBox(xref + 3 + (boxW * x), yref + boxH);
+		}
+		eraseBox(xref + boxW + 3, yref);
+		break;
 	case S:
+		eraseBox(xref + 3, yref + boxH);
+		eraseBox(xref + boxW + 3, yref + boxH);
+		eraseBox(xref + boxW + 3, yref);
+		eraseBox(xref + (2 * boxW) + 3, yref);
+		break;
 	case Z:
+		setConsoleColor(GREEN);
+		eraseBox(xref + 3, yref);
+		eraseBox(xref + boxW + 3, yref);
+		eraseBox(xref + (boxW)+3, yref + boxH);
+		eraseBox(xref + (2 * boxW) + 3, yref + boxH);
+		break;
 	case J:
+		for (int x = 0; x < 3; x++) {
+			eraseBox(xref + 3 + (boxW * x), yref + boxH);
+		}
+		eraseBox(xref + 3, yref);
+		break;
 	case L:
+		for (int x = 0; x < 3; x++) {
+			eraseBox(xref + 3 + (boxW * x), yref + boxH);
+		}
+		eraseBox(xref + 2 * boxW + 3, yref);
+		break;
+	case BLANK:
+		break;
+	default: 
+		cout << "Invalid Piece to be erased in holding box";
 		break;
 	}
 
 	switch (newPiece) {
 	case I:
 		setConsoleColor(CYAN);
-		for (int x = -1; x < 3; x++) {
+		for (int x = 0; x < 4; x++) {
 			drawBox(xref + (x * boxW), yref + 1);
 		}
 		break;
@@ -268,48 +378,49 @@ void drawHoldingPiece(piece oldPiece, piece newPiece) {
 		setConsoleColor(YELLOW);
 		for (int x = 0; x < 2; x++) {
 			for (int y = 0; y < 2; y++) {
-				drawBox(xref + (x * boxW), yref + (boxH * y));
+				drawBox(xref + boxW + (x * boxW), yref + (boxH * y));
 			}
 		}
 		break;
 	case T:
+		setConsoleColor(MAGENTA);
+		for (int x = 0; x < 3; x++) {
+			drawBox(xref + 3 + (boxW * x), yref + boxH);
+		}
+		drawBox(xref + boxW + 3, yref);
+		break;
 	case S:
+		setConsoleColor(GREEN);
+		drawBox(xref + 3, yref + boxH);
+		drawBox(xref + boxW + 3, yref + boxH);
+		drawBox(xref + (boxW)+3, yref);
+		drawBox(xref + (2 * boxW) + 3, yref);
+		break;
 	case Z:
+		setConsoleColor(RED);
+		drawBox(xref + 3, yref);
+		drawBox(xref + boxW + 3, yref);
+		drawBox(xref + (boxW)+3, yref + boxH);
+		drawBox(xref + (2 * boxW) + 3, yref + boxH);
+		break;
 	case J:
+		setConsoleColor(BLUE);
+		for (int x = 0; x < 3; x++) {
+			drawBox(xref + 3 + (boxW * x), yref + boxH);
+		}
+		drawBox(xref + 3, yref);
+		break;
 	case L:
+		setConsoleColor(GRAY);
+		for (int x = 0; x < 3; x++) {
+			drawBox(xref + 3 + (boxW * x), yref + boxH);
+		}
+		drawBox(xref + 2 * boxW + 3, yref);
+		break;
+	default:
+		//cout << "Invalid Piece to be drawn in holding box";
 		break;
 	}
-}
-
-void makeRandomPiece() {
-	piece p2;
-	int type = (rand() % 7);
-
-	switch (type) {
-	case 0:
-		p2 = I;
-		break;
-	case 1:
-		p2 = O;
-		break;
-	case 2:
-		p2 = T;
-		break;
-	case 3:
-		p2 = S;
-		break;
-	case 4:
-		p2 = Z;
-		break;
-	case 5:
-		p2 = J;
-		break;
-	case 6:
-		p2 = L;
-		break;
-	}
-
-	createPiece(p2);
 }
 
 void rotatePieceCW() {
@@ -1700,8 +1811,14 @@ void drawBoundaries() {
 	offsetX = (monitorW - gameWidth) / (2);
 	offsetY = (monitorH - gameHeight) / (2);
 
-	offsetHoldingX = offsetX - (holdingBoxW + (3 * boxW));
-	offsetHoldingY = offsetY + (boxH * 2);
+	offsetHoldingX = (offsetX - holdingBoxW - boxW);
+	offsetHoldingY = (offsetY + 1);
+
+	offsetQueueX = offsetX + (gridW * boxW) + (boxW);
+	offsetQueueY = offsetHoldingY;
+
+	lineTextPosX = offsetHoldingX + (holdingBoxW / 3);
+	lineTextPosY = offsetY + holdingBoxH + boxH + 2;
 
 	setConsoleColor(WHITE);
 
@@ -1727,24 +1844,56 @@ void drawBoundaries() {
 	}
 }
 
-// this shit is so fucked
 void drawHoldingBox() {
-	//drawBox(offsetHoldingX, offsetHoldingY);
-
 	string output = "";
-	for (int y = 0; y < boxH; y++) {
-		for (int x = 0; x < holdingBoxW; x++) {
-			output += box;
-		}
 
-		output += '\n';
+	// top
+	for (int x = -2; x < holdingBoxW; x++) {
+		output += box;
 	}
 
-	setCursorPos(offsetHoldingX, offsetHoldingY);
+	setCursorPos(offsetHoldingX - 2, offsetHoldingY - 1);
 	cout << output;
+
+	// bottom
+	setCursorPos(offsetHoldingX - 2, offsetHoldingY + holdingBoxH + 1);
+	cout << output;
+	
+	// left
+	output = box;
+	output += box;
+	for (int y = 0; y <= holdingBoxH; y++) {
+		setCursorPos(offsetHoldingX - 2, offsetHoldingY + y);
+		cout << output;
+	}
+}
+
+void drawQueueBox() {
+	string output = "";
+
+	// top
+	for (int x = -2; x < queueBoxW; x++) {
+		output += box;
+	}
+
+	setCursorPos(offsetQueueX, offsetQueueY - 1);
+	cout << output;
+
+	// bottom
+	setCursorPos(offsetQueueX, offsetQueueY + queueBoxH + 1);
+	cout << output;
+
+	// right
+	output = box;
+	output += box;
+	for (int y = 0; y <= queueBoxH; y++) {
+		setCursorPos(offsetQueueX + queueBoxW, offsetQueueY + y);
+		cout << output;
+	}
 }
 
 bool getInput(input* dir) {
+	holdingUp = GetAsyncKeyState(VK_UP) & 0x0001;
 	holdPiece = GetAsyncKeyState(VK_SPACE) & 0x0001;
 	holdingDown = GetAsyncKeyState(VK_DOWN) & 0x8000;
 	rotateCCW = GetAsyncKeyState(0x41) & 0x0001;
@@ -1868,6 +2017,10 @@ unsigned short idToColor(int id) {
 }
 
 void makePiece(int x, int y, piece id) {
+	if (grid[x][y].enabled && nextGrid[x][y]) {
+		endGame = true;
+	}
+
 	nextGrid[x][y] = true;
 	grid[x][y].active = true;
 	grid[x][y].ID = id;
@@ -1997,6 +2150,7 @@ bool movePieceLeft() {
 
 void setPiece() {
 	pieceSet = true;
+	int linesJustCleared = 0;
 
 	for (int x = 0; x < gridW; x++) {
 		for (int y = 0; y < gridH; y++) {
@@ -2042,10 +2196,63 @@ void setPiece() {
 				}
 			}
 			row++;
+			linesCleared++;
+			linesJustCleared++;
 		}
 	}
 
-	makeRandomPiece();
+	// update score
+	switch (linesJustCleared) {
+	case 0:
+		break;
+	case 1:
+		score += 100;
+		break;
+	case 2: 
+		score += 250;
+		break;
+	case 3:
+		score += 400;
+		break;
+	case 4:
+		score += 800;
+		break;
+	defalut:
+		cout << "var \"linesCleared\" is greater than 4";
+		break;
+	}
+
+	/*
+	if (prevLinesCleared == 4) {
+		score += 800;
+	}
+	*/
+
+	prevLinesCleared = linesJustCleared;
+
+	int temp = level;
+	level = floor(linesCleared / 10);
+
+	// level up
+	if (temp != level) {
+		//theorSpeed -= speedStep;
+		theorSpeed *= 0.7116;
+		defaultSpeed = round(theorSpeed);
+	}
+
+	updateText();
+
+	createPiece(pieceQueue[0]);
+
+	piece newP = randomPiece();
+
+	drawHoldingPiece(pieceQueue[0], pieceQueue[1], offsetQueueX + 2, offsetQueueY + boxH);
+	drawHoldingPiece(pieceQueue[1], pieceQueue[2], offsetQueueX + 2, offsetQueueY + boxH + holdingBoxH);
+	drawHoldingPiece(pieceQueue[2], newP, offsetQueueX + 2, offsetQueueY + boxH + (2 * holdingBoxH));
+
+	pieceQueue[0] = pieceQueue[1];
+	pieceQueue[1] = pieceQueue[2];
+	pieceQueue[2] = newP;
 }
 
 // sets next grid array to current enabled grid
@@ -2064,6 +2271,7 @@ void setNextGrid() {
 void createPiece(piece x) {
 	r = 0;
 	pieceSet = false;
+	updatedHoldingPiece = false;
 
 	switch (x) {
 	case I: // I
@@ -2092,61 +2300,61 @@ void createPiece(piece x) {
 
 	case T: // T
 		p = T;
-		centerX = 4;
+		centerX = 5;
 		centerY = 1;
 
 		//setConsoleColor(MAGENTA);
 
-		makePiece(4, 0, ACTIVE);
-		for (int x = 3; x <= 5; x++) {
+		makePiece(5, 0, ACTIVE);
+		for (int x = 4; x <= 6; x++) {
 			makePiece(x, 1, ACTIVE);
 		}
 		break;
 
 	case S: // S
 		p = S;
-		centerX = 4;
+		centerX = 5;
 		centerY = 1;
 		//setConsoleColor(GREEN);
 
-		makePiece(4, 0, ACTIVE);
 		makePiece(5, 0, ACTIVE);
-		makePiece(3, 1, ACTIVE);
-		makePiece(4, 1, ACTIVE);
-		break;
-
-	case Z: // Z 
-		p = Z;
-		centerX = 4;
-		centerY = 1;
-		//setConsoleColor(RED);
-
-		makePiece(3, 0, ACTIVE);
-		makePiece(4, 0, ACTIVE);
+		makePiece(6, 0, ACTIVE);
 		makePiece(4, 1, ACTIVE);
 		makePiece(5, 1, ACTIVE);
 		break;
 
+	case Z: // Z 
+		p = Z;
+		centerX = 5;
+		centerY = 1;
+		//setConsoleColor(RED);
+
+		makePiece(4, 0, ACTIVE);
+		makePiece(5, 0, ACTIVE);
+		makePiece(5, 1, ACTIVE);
+		makePiece(6, 1, ACTIVE);
+		break;
+
 	case J: // J 
 		p = J;
-		centerX = 4;
+		centerX = 5;
 		centerY = 1;
 		//setConsoleColor(BLUE);
 
-		makePiece(3, 0, ACTIVE);
-		for (int x = 3; x <= 5; x++) {
+		makePiece(4, 0, ACTIVE);
+		for (int x = 4; x <= 6; x++) {
 			makePiece(x, 1, ACTIVE);
 		}
 		break;
 
 	case L: // L
 		p = L;
-		centerX = 4;
+		centerX = 5;
 		centerY = 1;
 		//setConsoleColor(GRAY);
 
-		makePiece(5, 0, ACTIVE);
-		for (int x = 3; x <= 5; x++) {
+		makePiece(6, 0, ACTIVE);
+		for (int x = 4; x <= 6; x++) {
 			makePiece(x, 1, ACTIVE);
 		}
 		break;
@@ -2185,7 +2393,7 @@ unsigned short randColor() {
 void drawBox(int x, int y) {
 
 	string output;
-	for (int i = 1; i <= boxH; i++) {
+	for (int i = 0; i < boxH; i++) {
 		setCursorPos(x, y + i);
 		output = "";
 		for (int j = 0; j < boxW; j++) {
@@ -2199,7 +2407,7 @@ void eraseBox(int x, int y) {
 	setConsoleColor(BLACK);
 
 	string output;
-	for (int i = 1; i <= boxH; i++) {
+	for (int i = 0; i < boxH; i++) {
 		setCursorPos(x, y + i);
 		output = "";
 		for (int j = 0; j < boxW; j++) {
@@ -2261,4 +2469,27 @@ void cls()
 
 	// Move the cursor back to the top left for the next sequence of writes
 	SetConsoleCursorPosition(hOut, topLeft);
+}
+
+piece randomPiece() {
+	int x = rand() % 7;
+	switch (x) {
+	case 0:
+		return I;
+	case 1:
+		return O;
+	case 2:
+		return T;
+	case 3:
+		return S;
+	case 4:
+		return Z;
+	case 5:
+		return J;
+	case 6:
+		return L;
+	default:
+		cout << "randomPiece() function messed up";
+		break;
+	}
 }
