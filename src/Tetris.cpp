@@ -1,71 +1,25 @@
-// Tetris.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// Tetris.cpp
 
-#include <iostream>
-#include <Windows.h>
-#include <string>
-#include <ctime>
-#include <math.h>
-
-// also, make a "checkIfPiecefits(pieceType, posx, posy, roation)" function
+#include "Tetris.h"
 
 using namespace std;
 
-enum input { LEFT, RIGHT, NONE, RESTART, END, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN };
-enum piece { I, O, T, S, Z, J, L, ACTIVE, BLANK };
-
-const unsigned short BLACK = 0;
-const unsigned short DARKBLUE = FOREGROUND_BLUE;
-const unsigned short DARKGREEN = FOREGROUND_GREEN;
-const unsigned short DARKCYAN = FOREGROUND_GREEN | FOREGROUND_BLUE;
-const unsigned short DARKRED = FOREGROUND_RED;
-const unsigned short DARKMAGENTA = FOREGROUND_RED | FOREGROUND_BLUE;
-const unsigned short DARKYELLOW = FOREGROUND_RED | FOREGROUND_GREEN;
-const unsigned short DARKGRAY = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
-const unsigned short GRAY = FOREGROUND_INTENSITY;
-const unsigned short BLUE = FOREGROUND_INTENSITY | FOREGROUND_BLUE;
-const unsigned short GREEN = FOREGROUND_INTENSITY | FOREGROUND_GREEN;
-const unsigned short CYAN = FOREGROUND_INTENSITY | FOREGROUND_GREEN | FOREGROUND_BLUE;
-const unsigned short RED = FOREGROUND_INTENSITY | FOREGROUND_RED;
-const unsigned short MAGENTA = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_BLUE;
-const unsigned short YELLOW = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;
-const unsigned short WHITE = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
-
-struct tile {
-	bool enabled;
-	bool active;
-	piece ID;
-
-	tile() : enabled(0), active(0), ID(BLANK) { }
-	tile(bool a, bool b, piece c) : enabled(a), active(b), ID(c) { }
-};
-
-unsigned short randColor();
-unsigned short idToColor(int);
-void printUpdatedGrid();
-void printFullGrid();
-void showConsoleCursor(bool);
-void drawBox(int, int);
-void eraseBox(int, int);
-void setCursorPos(int, int);
-void setConsoleColor(unsigned short);
-void updateGrid();
-void createPiece(piece);
-void setNextGrid();
-void setPiece();
-void drawBoundaries();
-void updateText();
-void drawHoldingPiece(piece, piece, int, int);
-void drawHoldingBox();
-void drawQueueBox();
-void makePiece(int, int, piece);
-void deletePiece(int, int);
-void rotatePieceCW();
-void rotatePieceCCW();
-void cls();
-bool getInput(input*);
-bool movePieceRight();
-bool movePieceLeft();
-piece randomPiece();
+const unsigned short BLACK 			= 0;
+const unsigned short DARKBLUE 		= FOREGROUND_BLUE;
+const unsigned short DARKGREEN 		= FOREGROUND_GREEN;
+const unsigned short DARKCYAN 		= FOREGROUND_GREEN 		| FOREGROUND_BLUE;
+const unsigned short DARKRED 		= FOREGROUND_RED;
+const unsigned short DARKMAGENTA 	= FOREGROUND_RED 		| FOREGROUND_BLUE;
+const unsigned short DARKYELLOW 	= FOREGROUND_RED 		| FOREGROUND_GREEN;
+const unsigned short DARKGRAY 		= FOREGROUND_RED 		| FOREGROUND_GREEN 	| FOREGROUND_BLUE;
+const unsigned short GRAY 			= FOREGROUND_INTENSITY;
+const unsigned short BLUE 			= FOREGROUND_INTENSITY 	| FOREGROUND_BLUE;
+const unsigned short GREEN			= FOREGROUND_INTENSITY 	| FOREGROUND_GREEN;
+const unsigned short CYAN 			= FOREGROUND_INTENSITY 	| FOREGROUND_GREEN 	| FOREGROUND_BLUE;
+const unsigned short RED 			= FOREGROUND_INTENSITY 	| FOREGROUND_RED;
+const unsigned short MAGENTA 		= FOREGROUND_INTENSITY 	| FOREGROUND_RED 	| FOREGROUND_BLUE;
+const unsigned short YELLOW 		= FOREGROUND_INTENSITY 	| FOREGROUND_RED 	| FOREGROUND_GREEN;
+const unsigned short WHITE 			= FOREGROUND_INTENSITY 	| FOREGROUND_RED 	| FOREGROUND_GREEN 	| FOREGROUND_BLUE;
 
 static const HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -90,6 +44,16 @@ piece p = BLANK;
 piece holding = BLANK;
 piece pieceQueue[queueLength];
 
+bool holdingUp;
+bool holdingDown;
+bool holdPiece;
+bool rotateCW;
+bool rotateCCW;
+bool pieceMoved;
+bool pieceSet;
+bool updatedHoldingPiece;
+bool endGame;
+unsigned char box = 219;
 int actualSpeed, defaultSpeed;
 int timer = 0;
 int r = 0;
@@ -104,22 +68,8 @@ int centerY;
 int rowCleared;
 int linesCleared, prevLinesCleared;
 int lineTextPosX, lineTextPosY, level;
-
 unsigned int score;
-
-bool holdingUp;
-bool holdingDown;
-bool holdPiece;
-bool rotateCW;
-bool rotateCCW;
-bool pieceMoved;
-bool pieceSet;
-bool updatedHoldingPiece;
-bool endGame;
-
 float theorSpeed;
-
-unsigned char box = 219;
 
 tile grid[gridW][gridH];
 bool nextGrid[gridW][gridH];
@@ -132,7 +82,7 @@ int main()
 	SendMessage(GetConsoleWindow(), WM_SYSKEYDOWN, VK_RETURN, 0x20000000);
 	showConsoleCursor(false);	// hides cursor
 
-START:
+	START:
 
 	endGame = false;
 	score = 0;
@@ -2490,6 +2440,7 @@ piece randomPiece() {
 		return L;
 	default:
 		cout << "randomPiece() function messed up";
+		return I;
 		break;
 	}
 }
