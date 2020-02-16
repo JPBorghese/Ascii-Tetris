@@ -6,6 +6,7 @@
 #include <string>
 #include <ctime>
 #include <math.h>
+#include <time.h>
 
 enum input { LEFT, RIGHT, NONE, RESTART, END, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN };
 enum piece { I, O, T, S, Z, J, L, ACTIVE, BLANK };
@@ -42,6 +43,7 @@ void deletePiece(int, int);
 void rotatePieceCW();
 void rotatePieceCCW();
 void cls();
+void resetInput();
 bool getInput(input*);
 bool movePieceRight();
 bool movePieceLeft();

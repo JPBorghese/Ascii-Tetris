@@ -35,9 +35,9 @@ const int holdingBoxH = (boxH * 4);
 const int queueBoxW = holdingBoxW;
 const int queueBoxH = holdingBoxH * queueLength;
 const int blankID = -1;
-const int updatesPerSecond = 120;
 const int downSpeed = 5;
 const float speedStep = 4.6 * 2;
+const double updatesPerSecond = 1.0 / 128.0;	// 128 updates per second
 
 input i = NONE;
 piece p = BLANK;
@@ -74,13 +74,16 @@ float theorSpeed;
 tile grid[gridW][gridH];
 bool nextGrid[gridW][gridH];
 
+clock_t startTime;
+clock_t endTime;
+
 int main()
 {
-	srand(unsigned int(time(NULL)));			// randomizes rand
-	system("mode con COLS=700");  // fullscreen
-	ShowWindow(GetConsoleWindow(), SW_MAXIMIZE);
-	SendMessage(GetConsoleWindow(), WM_SYSKEYDOWN, VK_RETURN, 0x20000000);
+	ShowWindow(GetConsoleWindow(), SW_MAXIMIZE);	// fullscreen
+	//SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);	// sets window pos
 	showConsoleCursor(false);	// hides cursor
+
+	srand(unsigned int(time(NULL)));			// randomizes rand
 
 	START:
 
@@ -96,6 +99,7 @@ int main()
 	drawHoldingBox();
 	drawQueueBox();
 	updateText();
+	resetInput();
 
 	for (int y = 0; y < gridH; y++) {  // initialize grids
 		for (int x = 0; x < gridW; x++) {
@@ -118,10 +122,12 @@ int main()
 
 	// create Starting Piece
 	createPiece(randomPiece());
+	getInput(&i);
 
 	while (true) {
-		
-		getInput(&i);
+
+		startTime = clock();
+
 		pieceMoved = false;
 		rowCleared = -1;
 
@@ -180,6 +186,7 @@ int main()
 				break;
 			}
 		} 
+		
 		if (timer % actualSpeed == 0) {
 			updateGrid();
 		}
@@ -231,15 +238,30 @@ int main()
 			break;
 		}
 
-		Sleep(1000 / updatesPerSecond);
+		resetInput();
+		endTime = clock();
+
+		while((double)(endTime - startTime) / CLOCKS_PER_SEC < ((double)updatesPerSecond)) {	// wait until the deltaTime > speed
+			getInput(&i);
+			endTime = clock();
+		}
+
 		timer++;
 	}
 
 	cout.flush();
 	cout << "Game Over";
-	cin.ignore();
 
 	return 0;
+}
+
+void resetInput() {
+	holdingUp = false;
+	holdPiece = false;
+	holdingDown = false;
+	rotateCCW = false;
+	rotateCW = false;
+	i = NONE;
 }
 
 void updateText() {
@@ -255,7 +277,7 @@ void updateText() {
 
 	/*
 	setCursorPos(lineTextPosX, lineTextPosY + 4);
-	cout << "Speed :" << theorSpeed;
+	cout << "Timer :" << timer;
 
 	setCursorPos(lineTextPosX, lineTextPosY + 6);
 	cout << "DefaultSpeed : " << defaultSpeed;
@@ -593,7 +615,6 @@ void rotatePieceCW() {
 
 				// Checkng if the next pieces are open or not
 				bool b0 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-
 
 				if (!b0) {
 					if (!pieceMoved) {
@@ -1843,50 +1864,64 @@ void drawQueueBox() {
 }
 
 bool getInput(input* dir) {
-	holdingUp = GetAsyncKeyState(VK_UP) & 0x0001;
-	holdPiece = GetAsyncKeyState(VK_SPACE) & 0x0001;
-	holdingDown = GetAsyncKeyState(VK_DOWN) & 0x8000;
-	rotateCCW = GetAsyncKeyState(0x41) & 0x0001;
-	rotateCW = GetAsyncKeyState(0x44) & 0x0001;
 
-	if (GetAsyncKeyState(VK_LEFT) & 0x0001) { // left
-		*dir = LEFT;
+	if (!holdingUp) {
+		holdingUp = GetAsyncKeyState(VK_UP) & 0x0001;
 	}
-	else if (GetAsyncKeyState(VK_RIGHT) & 0x0001) { // right
-		*dir = RIGHT;
+
+	if (!holdPiece) {
+		holdPiece = GetAsyncKeyState(VK_SPACE) & 0x0001;
 	}
-	else if (GetAsyncKeyState(VK_ESCAPE)) {
-		*dir = END;
+
+	if (!holdingDown) {
+		holdingDown = GetAsyncKeyState(VK_DOWN);
 	}
-	else if (GetAsyncKeyState(0x52) & 0x0001) {
-		*dir = RESTART;
+	
+	if (!rotateCCW) {
+		rotateCCW = GetAsyncKeyState(0x41) & 0x0001;
 	}
-	else if (GetAsyncKeyState(0x31) & 0x0001) { //
-		*dir = ONE;
+	
+	if (!rotateCW) {
+		rotateCW = GetAsyncKeyState(0x44) & 0x0001;
 	}
-	else if (GetAsyncKeyState(0x32) & 0x0001) { //
-		*dir = TWO;
+
+	if (*dir == NONE) {
+		if (GetAsyncKeyState(VK_LEFT) & 0x0001) { // left
+			*dir = LEFT;
+		}
+		else if (GetAsyncKeyState(VK_RIGHT) & 0x0001) { // right
+			*dir = RIGHT;
+		}
+		else if (GetAsyncKeyState(VK_ESCAPE)) {
+			*dir = END;
+		}
+		else if (GetAsyncKeyState(0x52)) {
+			*dir = RESTART;
+		}
+		else if (GetAsyncKeyState(0x31) & 0x0001) { //
+			*dir = ONE;
+		}
+		else if (GetAsyncKeyState(0x32) & 0x0001) { //
+			*dir = TWO;
+		}
+		else if (GetAsyncKeyState(0x33) & 0x0001) { // 
+			*dir = THREE;
+		}
+		else if (GetAsyncKeyState(0x34) & 0x0001) { // 
+			*dir = FOUR;
+		}
+		else if (GetAsyncKeyState(0x35) & 0x0001) { // 
+			*dir = FIVE;
+		}
+		else if (GetAsyncKeyState(0x36) & 0x0001) { // 
+			*dir = SIX;
+		}
+		else if (GetAsyncKeyState(0x37) & 0x0001) {
+			*dir = SEVEN;
+		}
 	}
-	else if (GetAsyncKeyState(0x33) & 0x0001) { // 
-		*dir = THREE;
-	}
-	else if (GetAsyncKeyState(0x34) & 0x0001) { // 
-		*dir = FOUR;
-	}
-	else if (GetAsyncKeyState(0x35) & 0x0001) { // 
-		*dir = FIVE;
-	}
-	else if (GetAsyncKeyState(0x36) & 0x0001) { // 
-		*dir = SIX;
-	}
-	else if (GetAsyncKeyState(0x37) & 0x0001) {
-		*dir = SEVEN;
-	}
-	else {
-		*dir = NONE;
-		return false;
-	}
-	return true;
+
+	return 0;
 }
 
 // Only draws tiles that are needed
