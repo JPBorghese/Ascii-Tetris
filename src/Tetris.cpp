@@ -56,7 +56,7 @@ bool endGame;
 unsigned char box = 219;
 int actualSpeed, defaultSpeed;
 int timer = 0;
-int r = 0;
+int r;
 int offsetY; // the offset of the main grid
 int offsetX;
 int offsetHoldingX; // the offset of the holding box
@@ -94,6 +94,7 @@ int main()
 	level = 0;
 	defaultSpeed = 48 * 2;		// level 0 speed
 	theorSpeed = defaultSpeed;
+	r = 0;
 
 	drawBoundaries();
 	drawHoldingBox();
@@ -253,6 +254,88 @@ int main()
 	cout << "Game Over";
 
 	return 0;
+}
+
+bool checkIfPieceFits(piece p, int x, int y, int r)	{	
+	// checkIfPiecefits(pieceType, posx, posy, roation) function 
+	// returns true if the piece could fit
+
+	bool b0, b1, b2, b3;
+
+	b0 = grid[x][y].enabled;
+
+	switch(p) {
+		case I:
+		{
+
+			switch(r) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 2 >= gridW) {
+						return false;
+					}
+
+					// Checkng if the next pieces are open or not
+					b1 = grid[x - 1][y].enabled;
+					b2 = grid[x + 1][y].enabled;
+					b3 = grid[x + 2][y].enabled;
+
+					break;
+				}
+
+				case 1:
+				{
+					if (y - 1 < 0 || y + 2 >= gridH) {
+						return false;
+					}
+
+					b1 = grid[x][y - 1].enabled;
+					b2 = grid[x][y + 1].enabled;
+					b3 = grid[x][y + 2].enabled;
+
+					break;
+				}
+
+				case 2: 
+				{
+					if (x - 2 < 0 || x + 1 >= gridW) {
+						return false;
+					}
+
+					b1 = grid[x + 1][y].enabled;
+					b2 = grid[x - 1][y].enabled;
+					b3 = grid[x - 2][y].enabled;
+
+					break;
+				}
+
+				case 3: 
+				{
+					if (y + 1 >= gridH || y - 2 < 0) { 
+						return false; 
+					}
+
+					b1 = grid[x][y + 1].enabled;
+					b2 = grid[x][y - 1].enabled;
+					b3 = grid[x][y - 2].enabled;
+
+					break;
+				}
+			}
+
+			return !b0 && !b1 && !b2 && !b3;
+		}
+		case O:
+		case T:
+		case Z:
+		case J:
+		case L:
+		default:
+		break;
+	}
+
+	return false;
+
 }
 
 void resetInput() {
