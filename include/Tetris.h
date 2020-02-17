@@ -47,6 +47,6 @@ void resetInput();
 bool getInput(input*);
 bool movePieceRight();
 bool movePieceLeft();
+bool checkIfPieceFits(piece, int, int, int);	// checkIfPiecefits(pieceType, posx, posy, roation) function
 piece randomPiece();
 
-// also, make a "checkIfPiecefits(pieceType, posx, posy, roation)" function
