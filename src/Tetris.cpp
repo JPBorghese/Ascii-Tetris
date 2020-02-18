@@ -260,13 +260,14 @@ bool checkIfPieceFits(piece p, int x, int y, int r)	{
 	// checkIfPiecefits(pieceType, posx, posy, roation) function 
 	// returns true if the piece could fit
 
+	if (x < 0 || x >= gridW || y < 0 || y >= gridH) { return false; }
+
 	bool b0, b1, b2, b3;
 
 	b0 = grid[x][y].enabled;
 
 	switch(p) {
-		case I:
-		{
+		case I: {
 
 			switch(r) {
 				case 0:
@@ -321,20 +322,289 @@ bool checkIfPieceFits(piece p, int x, int y, int r)	{
 
 					break;
 				}
+
+				default:
+					return false;
 			}
 
-			return !b0 && !b1 && !b2 && !b3;
+			break;
 		}
-		case O:
-		case T:
-		case Z:
-		case J:
-		case L:
+		case O: {
+			switch(r) {
+				case 0:
+				case 1:
+				case 2:
+				case 3:
+				{
+					if (x + 1 >= gridW || y + 1 >= gridH) { 
+						return false; 
+					}
+					return true;
+				}
+
+				default:
+					return false;
+			}
+
+			break;
+		}
+		case T: {
+			switch(r) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
+
+					b1 = grid[x - 1][y].enabled;
+					b2 = grid[x + 1][y].enabled;
+					b3 = grid[x][y - 1].enabled;
+
+					break;
+				}
+
+				case 1:
+				{
+					if (y - 1 < 0 || y + 1 >= gridH || x + 1 >= gridW) { return false; }
+
+					b1 = grid[x][y - 1].enabled;
+					b2 = grid[x][y + 1].enabled;
+					b3 = grid[x + 1][y].enabled;
+
+					break;
+				}
+
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x - 1][y].enabled;
+					b2 = grid[x + 1][y].enabled;
+					b3 = grid[x][y + 1].enabled;
+
+					break;
+				}
+
+				case 3:
+				{
+					if (y - 1 < 0 || y + 1 >= gridH || x - 1 < 0) { return false; }
+
+					b1 = grid[x][y - 1].enabled;
+					b2 = grid[x][y + 1].enabled;
+					b3 = grid[x - 1][y].enabled;
+
+					break;
+				}
+
+				default:
+					return false;
+			}
+
+			break;
+		}
+		case S:
+		{
+			switch(r) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x - 1][y].enabled;
+					b2 = grid[x][y - 1].enabled;
+					b3 = grid[x + 1][y - 1].enabled;
+
+					break;
+				}
+
+				case 1:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y - 1].enabled;
+					b2 = grid[x + 1][y].enabled;
+					b3 = grid[x + 1][y + 1].enabled;
+
+					break;
+				}
+
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x + 1][y].enabled;
+					b2 = grid[x][y + 1].enabled;
+					b3 = grid[x - 1][y + 1].enabled;
+
+					break;
+				}
+
+				case 3:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y + 1].enabled;
+					b2 = grid[x - 1][y].enabled;
+					b3 = grid[x - 1][y - 1].enabled;
+
+					break;
+				}
+
+				default:
+					return false;
+			}
+			break;
+		}
+		case Z: {
+			switch(r) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
+
+					b0 = grid[x - 1][y - 1].enabled;
+					b1 = grid[x][y - 1].enabled;
+					b2 = grid[x + 1][y].enabled;
+
+					break;
+				}
+				case 1:
+				{
+					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b0 = grid[x][y + 1].enabled;
+					b1 = grid[x + 1][y].enabled;
+					b2 = grid[x + 1][y - 1].enabled;
+
+					break;
+				}
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x - 1][y].enabled;
+					b2 = grid[x][y + 1].enabled;
+					b3 = grid[x + 1][y + 1].enabled;
+
+					break;
+				}
+				case 3:
+				{
+					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b0 = grid[x - 1][y - 1].enabled;
+					b1 = grid[x - 1][y].enabled;
+					b2 = grid[x][y - 1].enabled;
+
+					break;
+				}
+				default:
+					return false;
+			}
+
+			break;
+		}
+		case J: {
+			switch(r) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
+
+					b1 = grid[x - 1][y].enabled;
+					b2 = grid[x - 1][y - 1].enabled;
+					b3 = grid[x + 1][y].enabled;
+
+					break;
+				}
+				case 1:
+				{
+					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y + 1].enabled;
+					b2 = grid[x][y - 1].enabled;
+					b3 = grid[x + 1][y - 1].enabled;
+
+					break;
+				}
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x - 1][y].enabled;
+					b2 = grid[x + 1][y].enabled;
+					b3 = grid[x + 1][y + 1].enabled;
+
+					break;
+				}
+				case 3:
+				{
+					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y - 1].enabled;
+					b2 = grid[x][y + 1].enabled;
+					b3 = grid[x - 1][y + 1].enabled;
+
+					break;
+				}
+
+				default:
+					return false;
+			}
+
+			break;
+		}
+		case L: {
+			switch(r) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
+
+					b1 = grid[x - 1][y].enabled;
+					b2 = grid[x + 1][y].enabled;
+					b3 = grid[x + 1][y - 1].enabled;
+
+					break;
+				}
+
+				case 1:
+				{
+					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y - 1].enabled;
+					b2 = grid[x][y + 1].enabled;
+					b3 = grid[x + 1][y + 1].enabled;
+
+					break;
+				}
+
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x + 1][y].enabled;
+					b2 = grid[x - 1][y].enabled;
+					b3 = grid[x - 1][y + 1].enabled;
+
+					break;
+				}
+
+				case 3:
+				{
+					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y + 1].enabled;
+					b2 = grid[x][y - 1].enabled;
+					b3 = grid[x - 1][y - 1].enabled;
+
+					break;
+				}
+				default:
+					return false;
+			}
+
+			break;
+		}
 		default:
-		break;
+			return false;
 	}
 
-	return false;
+	return !b0 & !b1 & !b2 & !b3;
 
 }
 
