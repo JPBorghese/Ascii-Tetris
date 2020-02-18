@@ -1863,7 +1863,8 @@ void drawBoundaries() {
 	int gameHeight = (boxH * (gridH + 1));
 
 	offsetX = (monitorW - gameWidth) / (2);
-	offsetY = (monitorH - gameHeight) / (2);
+	//offsetY = (monitorH - gameHeight) / (2);
+	offsetY = 1;
 
 	offsetHoldingX = (offsetX - holdingBoxW - boxW);
 	offsetHoldingY = (offsetY + 1);
