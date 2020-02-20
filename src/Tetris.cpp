@@ -885,7 +885,17 @@ void rotatePieceCW() {
 			break;
 		}
 		case O:
+		{
+			if (r == 0) {
+				centerX++;
+			} else if (r == 1) {
+				centerY++;
+			} else if (r == 2) {
+				centerX--;
+			} else {
+				centerY--;
 			return;
+		}
 		case T:
 		{
 			if (r == 0) {
@@ -1577,6 +1587,15 @@ void rotatePieceCCW() {
 			break;
 		}
 		case O:
+			if (r == 0) {
+				centerY++;
+			} else if (r == 1) {
+				centerX--;
+			} else if (r == 2) {
+				centerY--;
+			} else {
+				centerX++;
+			}
 			break;
 		case T:
 		{
