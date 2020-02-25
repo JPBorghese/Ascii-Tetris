@@ -256,7 +256,7 @@ int main()
 	return 0;
 }
 
-bool checkIfPieceFits(piece p, int x, int y, int r)	{	
+bool checkIfPieceFits(piece p, int x, int y, int rot)	{	
 	// checkIfPiecefits(pieceType, posx, posy, roation) function 
 	// returns true if the piece could fit
 
@@ -269,7 +269,7 @@ bool checkIfPieceFits(piece p, int x, int y, int r)	{
 	switch(p) {
 		case I: {
 
-			switch(r) {
+			switch(rot) {
 				case 0:
 				{
 					if (x - 1 < 0 || x + 2 >= gridW) {
@@ -349,7 +349,7 @@ bool checkIfPieceFits(piece p, int x, int y, int r)	{
 			break;
 		}
 		case T: {
-			switch(r) {
+			switch(rot) {
 				case 0:
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
@@ -402,7 +402,7 @@ bool checkIfPieceFits(piece p, int x, int y, int r)	{
 		}
 		case S:
 		{
-			switch(r) {
+			switch(rot) {
 				case 0:
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
@@ -453,7 +453,7 @@ bool checkIfPieceFits(piece p, int x, int y, int r)	{
 			break;
 		}
 		case Z: {
-			switch(r) {
+			switch(rot) {
 				case 0:
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
@@ -501,7 +501,7 @@ bool checkIfPieceFits(piece p, int x, int y, int r)	{
 			break;
 		}
 		case J: {
-			switch(r) {
+			switch(rot) {
 				case 0:
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
@@ -550,7 +550,7 @@ bool checkIfPieceFits(piece p, int x, int y, int r)	{
 			break;
 		}
 		case L: {
-			switch(r) {
+			switch(rot) {
 				case 0:
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
@@ -760,17 +760,9 @@ void rotatePieceCW() {
 		case I:
 		{
 			if (r == 0) {
-				if (centerY - 1 < 0 || centerY + 2 >= gridH) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY - 1].enabled;
-				bool b1 = grid[centerX + 1][centerY + 1].enabled;
-				bool b2 = grid[centerX + 1][centerY + 2].enabled;
 
 
-				if (!b0 && !b1 && !b2) {
+				if (checkIfPieceFits(p, centerX, centerY, 1)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
@@ -894,6 +886,7 @@ void rotatePieceCW() {
 				centerX--;
 			} else {
 				centerY--;
+			}
 			return;
 		}
 		case T:
@@ -2600,7 +2593,7 @@ void setPiece() {
 
 	updateText();
 
-	createPiece(pieceQueue[0]);
+	//createPiece(pieceQueue[0]);
 
 	piece newP = randomPiece();
 
