@@ -48,5 +48,6 @@ bool getInput(input*);
 bool movePieceRight();
 bool movePieceLeft();
 bool checkIfPieceFits(piece, int, int, int);	// checkIfPiecefits(pieceType, posx, posy, roation) function
+void makeFullPiece(piece, int, int, int);		// makeFullPiece(pieceType, posx, posy, rotation)
 piece randomPiece();
 
