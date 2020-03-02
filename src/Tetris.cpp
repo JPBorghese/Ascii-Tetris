@@ -832,23 +832,226 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 	}
 }
 
-void deleteFullPiced(piece p, int x, int y, int rot) {
-	switch (piece p) {
+void deleteFullPiece(piece p, int x, int y, int rot) {
+
+	switch(p) {
 		case I: {
-			switch (rot) {
+			switch(rot) {
 				case 0: {
-					
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x + 2, y);
+					break;
 				}
 				case 1: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x, y + 2);
+					break;
+				}
+				case 2: {
+					deletePiece(x + 1, y);
+					deletePiece(x, y);
+					deletePiece(x - 1, y);
+					deletePiece(x - 2, y);
+					break;
+				}
+				case 4: {
+					deletePiece(x, y + 1);
+					deletePiece(x, y);
+					deletePiece(x, y - 1);
+					deletePiece(x, y - 2);
+					break;
+				}
+				default:{
+					return;
+				}
+				break;
+			}
+			break;
+		}
+		case O: {
+			deletePiece(x, y);
+			deletePiece(x + 1, y);
+			deletePiece(x, y + 1);
+			deletePiece(x + 1, y + 1);
+			break;
+		}
+		case T: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x, y - 1);
+					break;
+				}
+				case 1: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x + 1, y);
+					break;
+				}
+				case 2: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x, y + 1);
+					break;
+				}
+				case 4: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y- 1);
+					deletePiece(x, y + 1);
+					break;
+				}
+				default: {
+					return;
+				}
+			}
+			break;
+		}
+		case S: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y - 1);
+					deletePiece(x + 1, y - 1);
+					break;
+				}
+				case 1: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x + 1, y + 1);
+					break;
 
 				}
 				case 2: {
+					deletePiece(x + 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x - 1, y + 1);
+					break;
+				}
+				case 4: {
+					deletePiece(x - 1, y - 1);
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					break;
 
 				}
-				case 3: {
-
-				}
+				default:
+					return;
 			}
+		}
+		case Z: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y - 1);
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					break;
+				}
+				case 1: {
+					deletePiece(x + 1, y - 1);
+					deletePiece(x + 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					break;
+				}
+				case 2: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x + 1, y + 1);
+					break;
+				}
+				case 4: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x - 1, y);
+					deletePiece(x - 1, y + 1);
+					break;
+				}
+				default:
+					return;
+			}
+		}
+		case J: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y - 1);
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					break;
+				}
+				case 1: {
+					deletePiece(x, y + 1);
+					deletePiece(x, y);
+					deletePiece(x, y - 1);
+					deletePiece(x + 1, y - 1);
+					break;
+				}
+				case 2: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x + 1, y + 1);
+					break;
+				}
+				case 4: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x - 1, y + 1);
+					break;
+				}
+				default:
+					return;
+			}
+		}
+		case L: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x + 1, y - 1);
+				}
+				case 1: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x + 1, y + 1);
+				}
+				case 2: {
+					deletePiece(x + 1, y);
+					deletePiece(x, y);
+					deletePiece(x - 1, y);
+					deletePiece(x - 1, y + 1);
+				}
+				case 4: {
+					deletePiece(x, y + 1);
+					deletePiece(x, y);
+					deletePiece(x, y - 1);
+					deletePiece(x - 1, y - 1);
+				}
+				default:
+					return;
+			}
+		}
+		default: {
+			printf("makeFullPiece() function weird piece: %d", p);
+			break;
 		}
 	}
 }
