@@ -30,7 +30,7 @@ const int boxW = 5;
 const int boxH = 2;
 const int gridW = 10; // the width of the grid (grid)
 const int gridH = 23;
-const int holdingBoxW = (boxW * 4) + 4; // the widht of the holding box (spaces)
+const int holdingBoxW = (boxW * 4) + 4; // the width of the holding box (spaces)
 const int holdingBoxH = (boxH * 4);
 const int queueBoxW = holdingBoxW;
 const int queueBoxH = holdingBoxH * queueLength;
@@ -56,7 +56,7 @@ bool endGame;
 unsigned char box = 219;
 int actualSpeed, defaultSpeed;
 int timer = 0;
-int r = 0;
+int r;
 int offsetY; // the offset of the main grid
 int offsetX;
 int offsetHoldingX; // the offset of the holding box
@@ -94,6 +94,7 @@ int main()
 	level = 0;
 	defaultSpeed = 48 * 2;		// level 0 speed
 	theorSpeed = defaultSpeed;
+	r = 0;
 
 	drawBoundaries();
 	drawHoldingBox();
@@ -191,7 +192,7 @@ int main()
 			updateGrid();
 		}
 
-		if (holdPiece && !updatedHoldingPiece) {
+		if (holdPiece && !updatedHoldingPiece) {	// runs if hold Piece should be updated
 			// delete Current Piece
 			for (int y = 0; y < gridH; y++) {
 				for (int x = 0; x < gridW; x++) {
@@ -253,6 +254,833 @@ int main()
 	cout << "Game Over";
 
 	return 0;
+}
+
+bool checkIfPieceFits(piece p0, int x, int y, int rot) {	
+
+	if (x < 0 || x >= gridW || y < 0 || y >= gridH) { return false; }
+
+	bool b0, b1, b2, b3;
+
+	b0 = grid[x][y].enabled && grid[x][y].ID != ACTIVE;
+
+	switch(p0) {
+		case I: {
+			switch(rot) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 2 >= gridW) {
+						return false;
+					}
+
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 2][y].enabled && grid[x + 2][y].ID != ACTIVE;
+
+					break;
+				}
+
+				case 1:
+				{
+					if (y - 1 < 0 || y + 2 >= gridH) {
+						return false;
+					}
+
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x][y + 2].enabled && grid[x][y + 2].ID != ACTIVE;
+
+					break;
+				}
+
+				case 2: 
+				{
+					if (x - 2 < 0 || x + 1 >= gridW) {
+						return false;
+					}
+
+					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b2 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b3 = grid[x - 2][y].enabled && grid[x - 2][y].ID != ACTIVE;
+
+					break;
+				}
+
+				case 3: 
+				{
+					if (y + 1 >= gridH || y - 2 < 0) { 
+						return false; 
+					}
+
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x][y - 2].enabled && grid[x][y - 2].ID != ACTIVE;
+
+					break;
+				}
+
+				default:
+					return false;
+			}
+
+			break;
+		}
+		case O: {
+			switch(rot) {
+				case 0:
+				case 1:
+				case 2:
+				case 3:
+				{
+					if (x + 1 >= gridW || y + 1 >= gridH) { 
+						return false; 
+					}
+
+					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
+					b3 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+
+					return true;
+				}
+
+				default:
+					return false;
+			}
+
+			break;
+		}
+		case T: {
+			switch(rot) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
+
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+
+					//printf("%d, %d, %d, %d", rot, b1, b2, b3);
+
+					break;
+				}
+
+				case 1:
+				{
+					if (y - 1 < 0 || y + 1 >= gridH || x + 1 >= gridW) { return false; }
+
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+
+					//printf("%d, %d, %d, %d", rot, b1, b2, b3);
+
+					break;
+				}
+
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+
+					//printf("%d, %d, %d, %d", rot, b1, b2, b3);
+
+					break;
+				}
+
+				case 3:
+				{
+					if (y - 1 < 0 || y + 1 >= gridH || x - 1 < 0) { return false; }
+
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+
+					//printf("%d, %d, %d, %d", rot, b1, b2, b3);
+
+					break;
+				}
+
+				default:
+					return false;
+			}
+
+			break;
+		}
+		case S: {
+			switch(rot) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
+
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x + 1][y - 1].enabled && grid[x + 1][y - 1].ID != ACTIVE;
+
+					break;
+				}
+
+				case 1:
+				{
+					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
+
+					break;
+				}
+
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x - 1][y + 1].enabled && grid[x - 1][y + 1].ID != ACTIVE;
+
+					break;
+				}
+
+				case 3:
+				{
+					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b3 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
+
+					break;
+				}
+
+				default:
+					return false;
+			}
+			break;
+		}
+		case Z: {
+			switch(rot) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
+
+					b1 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+
+					break;
+				}
+				case 1:
+				{
+					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 1][y - 1].enabled && grid[x + 1][y - 1].ID != ACTIVE;
+
+					break;
+				}
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
+
+					break;
+				}
+				case 3:
+				{
+					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
+					b2 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b3 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+
+					break;
+				}
+				default:
+					return false;
+			}
+
+			break;
+		}
+		case J: {
+			switch(rot) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
+
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
+					b3 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					break;
+				}
+				case 1:
+				{
+					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x + 1][y - 1].enabled && grid[x + 1][y - 1].ID != ACTIVE;
+					break;
+				}
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
+					break;
+				}
+				case 3:
+				{
+					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x - 1][y + 1].enabled && grid[x - 1][y + 1].ID != ACTIVE;
+					break;
+				}
+
+				default:
+					return false;
+			}
+
+			break;
+		}
+		case L: {
+			switch(rot) {
+				case 0:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
+
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 1][y - 1].enabled && grid[x + 1][y - 1].ID != ACTIVE;
+					break;
+				}
+
+				case 1:
+				{
+					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
+					break;
+				}
+
+				case 2:
+				{
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b2 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b3 = grid[x - 1][y + 1].enabled && grid[x - 1][y + 1].ID != ACTIVE;
+					break;
+				}
+
+				case 3:
+				{
+					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
+
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
+					break;
+				}
+				default:
+					return false;
+					break;
+			}
+			break;
+		}
+		default:
+			return false;
+			break;
+	}
+	//printf("%d", !b1 && !b2 && !b3);
+
+	return !b1 & !b2 & !b3;
+}
+
+void makeFullPiece(piece p0, int x, int y, int rot) {
+
+	piece id = ACTIVE;
+
+	switch(p0) {
+		case I: {
+			switch(rot) {
+				case 0: {
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x + 1, y, id);
+					makePiece(x + 2, y, id);
+					break;
+				}
+				case 1: {
+					makePiece(x, y - 1, id);
+					makePiece(x, y, id);
+					makePiece(x, y + 1, id);
+					makePiece(x, y + 2, id);
+					break;
+				}
+				case 2: {
+					makePiece(x + 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x - 1, y, id);
+					makePiece(x - 2, y, id);
+					break;
+				}
+				case 3: {
+					makePiece(x, y + 1, id);
+					makePiece(x, y, id);
+					makePiece(x, y - 1, id);
+					makePiece(x, y - 2, id);
+					break;
+				}
+				default:{
+					return;
+					break;
+				}
+			}
+			break;
+		}
+		case O: {
+			makePiece(x, y, id);
+			makePiece(x + 1, y, id);
+			makePiece(x, y + 1, id);
+			makePiece(x + 1, y + 1, id);
+			break;
+		}
+		case T: {
+			switch(rot) {
+				case 0: {
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x + 1, y, id);
+					makePiece(x, y - 1, id);
+					break;
+				}
+				case 1: {
+					makePiece(x, y - 1, id);
+					makePiece(x, y, id);
+					makePiece(x, y + 1, id);
+					makePiece(x + 1, y, id);
+					break;
+				}
+				case 2: {
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x + 1, y, id);
+					makePiece(x, y + 1, id);
+					break;
+				}
+				case 3: {
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x, y- 1, id);
+					makePiece(x, y + 1, id);
+					break;
+				}
+				default: {
+					return;
+					break;
+				}
+			}
+			break;
+		}
+		case S: {
+			switch(rot) {
+				case 0: {
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x, y - 1, id);
+					makePiece(x + 1, y - 1, id);
+					break;
+				}
+				case 1: {
+					makePiece(x, y - 1, id);
+					makePiece(x, y, id);
+					makePiece(x + 1, y, id);
+					makePiece(x + 1, y + 1, id);
+					break;
+
+				}
+				case 2: {
+					makePiece(x + 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x, y + 1, id);
+					makePiece(x - 1, y + 1, id);
+					break;
+				}
+				case 3: {
+					makePiece(x - 1, y - 1, id);
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x, y + 1, id);
+					break;
+
+				}
+				default: {
+					return;
+					break;
+				}
+			}
+			break;
+		}
+		case Z: {
+			switch(rot) {
+				case 0: {
+					makePiece(x - 1, y - 1, id);
+					makePiece(x, y - 1, id);
+					makePiece(x, y, id);
+					makePiece(x + 1, y, id);
+					break;
+				}
+				case 1: {
+					makePiece(x + 1, y - 1, id);
+					makePiece(x + 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x, y + 1, id);
+					break;
+				}
+				case 2: {
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x, y + 1, id);
+					makePiece(x + 1, y + 1, id);
+					break;
+				}
+				case 3: {
+					makePiece(x, y - 1, id);
+					makePiece(x, y, id);
+					makePiece(x - 1, y, id);
+					makePiece(x - 1, y + 1, id);
+					break;
+				}
+				default:
+					return;
+					break;
+			}
+			break;
+		}
+		case J: {
+			switch(rot) {
+				case 0: {
+					makePiece(x - 1, y - 1, id);
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x + 1, y, id);
+					break;
+				}
+				case 1: {
+					makePiece(x, y + 1, id);
+					makePiece(x, y, id);
+					makePiece(x, y - 1, id);
+					makePiece(x + 1, y - 1, id);
+					break;
+				}
+				case 2: {
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x + 1, y, id);
+					makePiece(x + 1, y + 1, id);
+					break;
+				}
+				case 3: {
+					makePiece(x, y - 1, id);
+					makePiece(x, y, id);
+					makePiece(x, y + 1, id);
+					makePiece(x - 1, y + 1, id);
+					break;
+				}
+				default:
+					return;
+					break;
+			}
+			break;
+		}
+		case L: {
+			switch(rot) {
+				case 0: {
+					makePiece(x - 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x + 1, y, id);
+					makePiece(x + 1, y - 1, id);
+					break;
+				}
+				case 1: {
+					makePiece(x, y - 1, id);
+					makePiece(x, y, id);
+					makePiece(x, y + 1, id);
+					makePiece(x + 1, y + 1, id);
+					break;
+				}
+				case 2: {
+					makePiece(x + 1, y, id);
+					makePiece(x, y, id);
+					makePiece(x - 1, y, id);
+					makePiece(x - 1, y + 1, id);
+					break;
+				}
+				case 3: {
+					makePiece(x, y + 1, id);
+					makePiece(x, y, id);
+					makePiece(x, y - 1, id);
+					makePiece(x - 1, y - 1, id);
+					break;
+				}
+				default:
+					return;
+					break;
+			}
+			break;
+		}
+
+		default: {
+			printf("makeFullPiece() function weird piece: %d", p);
+			break;
+		}
+	}
+}
+
+void deleteFullPiece(piece p0, int x, int y, int rot) {
+
+	switch(p0) {
+		case I: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x + 2, y);
+					break;
+				}
+				case 1: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x, y + 2);
+					break;
+				}
+				case 2: {
+					deletePiece(x + 1, y);
+					deletePiece(x, y);
+					deletePiece(x - 1, y);
+					deletePiece(x - 2, y);
+					break;
+				}
+				case 3: {
+					deletePiece(x, y + 1);
+					deletePiece(x, y);
+					deletePiece(x, y - 1);
+					deletePiece(x, y - 2);
+					break;
+				}
+				default:{
+					return;
+				}
+				break;
+			}
+			break;
+		}
+		case O: {
+			deletePiece(x, y);
+			deletePiece(x + 1, y);
+			deletePiece(x, y + 1);
+			deletePiece(x + 1, y + 1);
+			break;
+		}
+		case T: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x, y - 1);
+					break;
+				}
+				case 1: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x + 1, y);
+					break;
+				}
+				case 2: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x, y + 1);
+					break;
+				}
+				case 3: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y- 1);
+					deletePiece(x, y + 1);
+					break;
+				}
+				default: {
+					return;
+				}
+			}
+			break;
+		}
+		case S: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y - 1);
+					deletePiece(x + 1, y - 1);
+					break;
+				}
+				case 1: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x + 1, y + 1);
+					break;
+				}
+				case 2: {
+					deletePiece(x + 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x - 1, y + 1);
+					break;
+				}
+				case 3: {
+					deletePiece(x - 1, y - 1);
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					break;
+
+				}
+				default: {
+					return;
+				}
+			}
+			break;
+		}
+		case Z: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y - 1);
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					break;
+				}
+				case 1: {
+					deletePiece(x + 1, y - 1);
+					deletePiece(x + 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					break;
+				}
+				case 2: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x + 1, y + 1);
+					break;
+				}
+				case 3: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x - 1, y);
+					deletePiece(x - 1, y + 1);
+					break;
+				}
+				default:
+					return;
+			}
+			break;
+		}
+		case J: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y - 1);
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					break;
+				}
+				case 1: {
+					deletePiece(x, y + 1);
+					deletePiece(x, y);
+					deletePiece(x, y - 1);
+					deletePiece(x + 1, y - 1);
+					break;
+				}
+				case 2: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x + 1, y + 1);
+					break;
+				}
+				case 3: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x - 1, y + 1);
+					break;
+				}
+				default:
+					return;
+			}
+			break;
+		}
+		case L: {
+			switch(rot) {
+				case 0: {
+					deletePiece(x - 1, y);
+					deletePiece(x, y);
+					deletePiece(x + 1, y);
+					deletePiece(x + 1, y - 1);
+					break;
+				}
+				case 1: {
+					deletePiece(x, y - 1);
+					deletePiece(x, y);
+					deletePiece(x, y + 1);
+					deletePiece(x + 1, y + 1);
+					break;
+				}
+				case 2: {
+					deletePiece(x + 1, y);
+					deletePiece(x, y);
+					deletePiece(x - 1, y);
+					deletePiece(x - 1, y + 1);
+					break;
+				}
+				case 3: {
+					deletePiece(x, y + 1);
+					deletePiece(x, y);
+					deletePiece(x, y - 1);
+					deletePiece(x - 1, y - 1);
+					break;
+				}
+				default: 
+					return;
+					break;
+			}
+			break;
+		}
+		default: {
+			printf("makeFullPiece() function weird piece: %d", p);
+			break;
+		}
+	}
 }
 
 void resetInput() {
@@ -396,1373 +1224,189 @@ void drawHoldingPiece(piece oldPiece, piece newPiece, int offsetx, int offsety) 
 }
 
 void rotatePieceCW() {
-
 	if (pieceSet) {
 		return;
 	}
 
 	piece id = ACTIVE;
+	int nextRot = (r + 1) % 4;
 
 	switch (p) {
-		case I:
-		{
+		case I: {
 			if (r == 0) {
-				if (centerY - 1 < 0 || centerY + 2 >= gridH) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY - 1].enabled;
-				bool b1 = grid[centerX + 1][centerY + 1].enabled;
-				bool b2 = grid[centerX + 1][centerY + 2].enabled;
-
-
-				if (!b0 && !b1 && !b2) {
+				if (checkIfPieceFits(p, centerX + 1, centerY, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX, centerY);
-					deletePiece(centerX + 2, centerY);
+					deleteFullPiece(p, centerX, centerY, r);
+					makeFullPiece(p, centerX + 1, centerY, nextRot);
 
-					makePiece(centerX + 1, centerY - 1, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX + 1, centerY + 1, id);
-					makePiece(centerX + 1, centerY + 2, id);
-
-					r++;
+					r = nextRot;
 					centerX++;
 				}
 			}
 			else if (r == 1) {	// RIGHT
-				// Checking if the next piece positionin bounds
-				if (centerX + 1 >= gridW || centerX - 2 < 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX - 2][centerY + 1].enabled;
-				bool b1 = grid[centerX - 1][centerY + 1].enabled;
-				bool b2 = grid[centerX + 1][centerY + 1].enabled;
-
-
-				if (!b0 && !b1 && !b2) {
+				if (checkIfPieceFits(p, centerX, centerY + 1, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX, centerY);
-					deletePiece(centerX, centerY + 2);
+					deleteFullPiece(p, centerX, centerY, r);
+					makeFullPiece(p, centerX, centerY + 1, nextRot);
 
-					makePiece(centerX - 2, centerY + 1, id);
-					makePiece(centerX - 1, centerY + 1, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r++;
+					r = nextRot;
 					centerY++;
 				}
 			}
 			else if (r == 2) {	// DOWN
-				// Checking if the next piece positionin bounds
-				if (centerY + 1 >= gridH || centerY - 2 < 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX - 1][centerY + 1].enabled;
-				bool b1 = grid[centerX - 1][centerY - 1].enabled;
-				bool b2 = grid[centerX - 1][centerY - 2].enabled;
-
-
-				if (!b0 && !b1 && !b2) {
+				if (checkIfPieceFits(p, centerX - 1, centerY, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX, centerY);
-					deletePiece(centerX - 2, centerY);
+					deleteFullPiece(p, centerX, centerY, r);
+					makeFullPiece(p, centerX - 1, centerY, nextRot);
 
-					makePiece(centerX - 1, centerY + 1, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX - 1, centerY - 1, id);
-					makePiece(centerX - 1, centerY - 2, id);
-
-					r++;
+					r = nextRot;
 					centerX--;
 				}
 			}
 			else if (r == 3) {	// LEFT
-				// Checking if the next piece positionin bounds
-				if (centerX - 1 < 0 || centerX + 2 >= gridW) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 2][centerY - 1].enabled;
-				bool b1 = grid[centerX + 1][centerY - 1].enabled;
-				bool b2 = grid[centerX - 1][centerY - 1].enabled;
-
-
-				if (!b0 && !b1 && !b2) {
+				if (checkIfPieceFits(p, centerX, centerY - 1, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX, centerY);
-					deletePiece(centerX, centerY - 2);
+					deleteFullPiece(p, centerX, centerY, r);
+					makeFullPiece(p, centerX, centerY - 1, nextRot);
 
-					makePiece(centerX + 2, centerY - 1, id);
-					makePiece(centerX + 1, centerY - 1, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX - 1, centerY - 1, id);
-
-					r = 0;
+					r = nextRot;
 					centerY--;
 				}
 			}
 			break;
 		}
-		case O:
+		case O: {
 			return;
-		case T:
-		{
-			if (r == 0) {
-				if (centerY + 1 >= gridH) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX + 1, centerY, id);
-
-					r++;
-				}
-			}
-			else if (r == 1) {
-				if (centerX == 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 2) {
-				if (centerY == 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY - 1].enabled && grid[centerX][centerY - 1].ID != id;
-
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY, id);
-
-					r++;
-				}
-			}
-			else if (r == 3) {
-				// Checking if the next piece positionin bounds
-				if (centerX == gridW - 1) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY + 1);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-
-					r = 0;
-				}
-			}
 			break;
 		}
+		case T: 
 		case S:
-		{
-			if (r == 0) {
-				if (centerY + 1 == gridH) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-				bool b1 = grid[centerX + 1][centerY + 1].enabled && grid[centerX + 1][centerY + 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY - 1);
-					deletePiece(centerX - 1, centerY);
-				
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 1) {
-				if (centerX - 1 < 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-				bool b1 = grid[centerX - 1][centerY + 1].enabled && grid[centerX - 1][centerY + 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX + 1, centerY + 1);
-
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 2) {
-				if (centerY - 1 < 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-				bool b1 = grid[centerX - 1][centerY - 1].enabled && grid[centerX - 1][centerY - 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX - 1, centerY + 1);
-
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX - 1, centerY - 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 3) {
-				if (centerX + 1 >= gridW) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-				bool b1 = grid[centerX - 1][centerY - 1].enabled && grid[centerX - 1][centerY - 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX - 1, centerY - 1);
-
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX + 1, centerY - 1, id);
-
-					r = 0;
-				}
-			}
-			break;
-		}
 		case Z:
-		{
-			if (r == 0) {
-				if (centerY + 1 == gridH) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY - 1].enabled && grid[centerX + 1][centerY - 1].ID != id;
-				bool b1 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX - 1, centerY - 1);
-
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX + 1, centerY - 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 1) {
-				if (centerX == 0) {
-					break;
-				}
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-				bool b1 = grid[centerX + 1][centerY - 1].enabled && grid[centerX + 1][centerY - 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX + 1, centerY - 1);
-
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 2) {
-				if (centerY == 0) {
-					break;
-				}
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY - 1].enabled && grid[centerX][centerY - 1].ID != id;
-				bool b1 = grid[centerX - 1][centerY + 1].enabled && grid[centerX - 1][centerY + 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX + 1, centerY + 1);
-
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX - 1, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 3) {
-				if (centerX == gridW - 1) {
-					break;
-				}
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-				bool b1 = grid[centerX - 1][centerY - 1].enabled && grid[centerX - 1][centerY - 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX - 1, centerY + 1);
-
-					makePiece(centerX - 1, centerY - 1, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-
-					r = 0;
-				}
-			}
-			break;
-		}
 		case J:
-		{
-			if (r == 0) {
-				if (centerY + 1 == gridH) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY - 1].enabled && grid[centerX][centerY - 1].ID != id;
-				bool b1 = grid[centerX + 1][centerY - 1].enabled && grid[centerX + 1][centerY - 1].ID != id;
-				bool b2 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX - 1, centerY - 1);
-					deletePiece(centerX + 1, centerY);
-
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX + 1, centerY - 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 1) {
-				// Check if rotation will cause piece to go out of bounds
-				if (centerX == 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-				bool b1 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-				bool b2 = grid[centerX + 1][centerY + 1].enabled && grid[centerX + 1][centerY + 1].ID != id;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX + 1, centerY - 1);
-					deletePiece(centerX, centerY + 1);
-
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 2) {
-				// Check if rotation will cause piece to go out of bounds
-				if (centerY == 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY - 1].enabled && grid[centerX][centerY - 1].ID != id;
-				bool b1 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-				bool b2 = grid[centerX - 1][centerY + 1].enabled && grid[centerX - 1][centerY + 1].ID != id;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX + 1, centerY + 1);
-
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 3) {
-				// Check if rotation will cause piece to go out of bounds
-				if (centerX + 1 == gridW) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-				bool b1 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-				bool b2 = grid[centerX - 1][centerY - 1].enabled && grid[centerX - 1][centerY - 1].ID != id;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX - 1, centerY + 1);
-
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX - 1, centerY - 1, id);
-
-					r = 0;
-				}
-			}
-		}
 		case L:
 		{
-			if (r == 0) {
-				if (centerY + 1 == gridH) {
-					break;
+			if (checkIfPieceFits(p, centerX, centerY, nextRot)) 
+			{
+				if (!pieceMoved) {
+					pieceMoved = true;
+					setNextGrid();
 				}
 
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY - 1].enabled && grid[centerX][centerY - 1].ID != id;
-				bool b1 = grid[centerX + 1][centerY + 1].enabled && grid[centerX + 1][centerY + 1].ID != id;
-				bool b2 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
+				deleteFullPiece(p, centerX, centerY, r);
+				makeFullPiece(p, centerX, centerY, nextRot);
 
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX + 1, centerY - 1);
-					deletePiece(centerX + 1, centerY);
-
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r++;
-				}
+				r = nextRot;
 			}
-			else if (r == 1) {
-				// Check if rotation will cause piece to go out of bounds
-				if (centerX == 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-				bool b1 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-				bool b2 = grid[centerX - 1][centerY + 1].enabled && grid[centerX - 1][centerY + 1].ID != id;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX + 1, centerY + 1);
-					deletePiece(centerX, centerY + 1);
-
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX - 1, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 2) {
-				// Check if rotation will cause piece to go out of bounds
-				if (centerY == 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY - 1].enabled && grid[centerX][centerY - 1].ID != id;
-				bool b1 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-				bool b2 = grid[centerX - 1][centerY - 1].enabled && grid[centerX - 1][centerY - 1].ID != id;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX - 1, centerY + 1);
-
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY - 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 3) {
-				// Check if rotation will cause piece to go out of bounds
-				if (centerX + 1 == gridW) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-				bool b1 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-				bool b2 = grid[centerX - 1][centerY + 1].enabled && grid[centerX - 1][centerY + 1].ID != id;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX - 1, centerY - 1);
-
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX + 1, centerY - 1, id);
-
-					r = 0;
-				}
-			}
-		}
 			break;
+		}
+		default: break;
 	}
 }
 
 void rotatePieceCCW() {
-
 	if (pieceSet) {
 		return;
 	}
 
-	piece id = ACTIVE;
+	int nextRot = (r - 1 < 0) ? 3 : (r - 1);
 
 	switch (p) {
-		case I:
-		{
+		case I: {
 			if (r == 0) {
-				if (centerY - 1 < 0 || centerY + 2 >= gridH) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY - 1].enabled && grid[centerX][centerY - 1].ID != id;
-				bool b1 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-				bool b2 = grid[centerX][centerY + 2].enabled && grid[centerX][centerY + 2].ID != id;
-
-
-				if (!b0 && !b1 && !b2) {
+				if (checkIfPieceFits(p, centerX, centerY + 1, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX + 2, centerY);
-
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY + 2, id);
-
-					r = 3;
+					deleteFullPiece(p, centerX, centerY, r);
+					makeFullPiece(p, centerX, centerY + 1, nextRot);
 					centerY++;
+					r = nextRot;
 				}
 			}
 			else if (r == 1) {	// RIGHT
-				// Checking if the next piece positionin bounds
-				if (centerX + 1 >= gridW || centerX - 2 < 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-				bool b1 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-				bool b2 = grid[centerX - 2][centerY].enabled && grid[centerX - 2][centerY].ID != id;
-
-
-				if (!b0 && !b1 && !b2) {
+				if (checkIfPieceFits(p, centerX - 1, centerY, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX, centerY + 2);
-
-
-					makePiece(centerX - 2, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-
-					r--;
+					deleteFullPiece(p, centerX, centerY, r);
+					makeFullPiece(p, centerX - 1, centerY, nextRot);
 					centerX--;
+					r = nextRot;
 				}
 			}
 			else if (r == 2) {	// DOWN
-				// Checking if the next piece positionin bounds
-				if (centerY + 1 >= gridH || centerY - 2 < 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-				bool b1 = grid[centerX][centerY - 1].enabled && grid[centerX][centerY - 1].ID != id;
-				bool b2 = grid[centerX][centerY - 2].enabled && grid[centerX][centerY - 2].ID != id;
-
-
-				if (!b0 && !b1 && !b2) {
+				if (checkIfPieceFits(p, centerX, centerY - 1, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX - 2, centerY);
-
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY - 2, id);
-
-					r--;
+					deleteFullPiece(p, centerX, centerY, r);
+					makeFullPiece(p, centerX, centerY - 1, nextRot);
 					centerY--;
+					r = nextRot;
 				}
 			}
 			else if (r == 3) {	// LEFT
-				// Checking if the next piece positionin bounds
-				if (centerX - 1 < 0 || centerX + 2 >= gridW) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 2][centerY].enabled && grid[centerX + 2][centerY].ID != id;
-				bool b1 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-				bool b2 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-
-
-				if (!b0 && !b1 && !b2) {
+				if (checkIfPieceFits(p, centerX + 1, centerY, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
-					deletePiece(centerX, centerY - 2);
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX, centerY + 1);
-
-					makePiece(centerX + 2, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-
-					r--;
+					deleteFullPiece(p, centerX, centerY, r);
+					makeFullPiece(p, centerX + 1, centerY, nextRot);
 					centerX++;
+					r = nextRot;
 				}
 			}
 			break;
 		}
-		case O:
-			break;
-		case T:
-		{
-			if (r == 0) {
-				
-				if (centerY + 1 == gridH) {
-					break;
-				}
-
-				bool b0 = grid[centerX][centerY + 1].enabled;
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY);
-					
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY, id);
-
-					r = 3;
-				}
-			}
-			else if (r == 3) {
-
-				if (centerX + 1 == gridW) {
-					break;
-				}
-
-				bool b0 = grid[centerX + 1][centerY].enabled;
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-
-					r--;
-				}
-			}
-			else if (r == 2) {
-
-				if (centerY == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX][centerY - 1].enabled;
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX + 1, centerY, id);
-
-					r--;
-				}
-			}
-			else if (r == 1) {
-
-				if (centerX == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX - 1][centerY].enabled;
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY + 1);
-
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-
-					r--;
-				}
-			}
+		case O: {
+			return;
 			break;
 		}
+		case T: 
 		case S:
-		{
-			if (r == 0) {
-
-				if (centerY + 1 == gridH) {
-					break;
-				}
-
-				bool b0 = grid[centerX - 1][centerY - 1].enabled;
-				bool b1 = grid[centerX][centerY + 1].enabled;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX + 1, centerY - 1);
-
-					makePiece(centerX - 1, centerY - 1, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-
-					r = 3;
-				}
-			}
-			else if (r == 3) {
-
-
-				if (centerX + 1 == gridW) {
-					break;
-				}
-
-				bool b0 = grid[centerX + 1][centerY].enabled;
-				bool b1 = grid[centerX - 1][centerY + 1].enabled;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX - 1, centerY - 1);
-
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY + 1, id);
-
-					r--;
-				}
-			}
-			else if (r == 2) {
-
-				if (centerY == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX][centerY - 1].enabled;
-				bool b1 = grid[centerX + 1][centerY + 1].enabled;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX - 1, centerY + 1);
-
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r--;
-				}
-			}
-			else if (r == 1) {
-
-				if (centerX == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX + 1][centerY - 1].enabled;
-				bool b1 = grid[centerX - 1][centerY].enabled;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX + 1, centerY + 1);
-
-					makePiece(centerX + 1, centerY - 1, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-
-					r--;
-				}
-			}
-			break;
-		}
 		case Z:
-		{
-			if (r == 0) {
-				if (centerY + 1 == gridH) {
-					break;
-				}
-
-				bool b0 = grid[centerX - 1][centerY].enabled;
-				bool b1 = grid[centerX - 1][centerY + 1].enabled;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX - 1, centerY - 1);
-
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX - 1, centerY + 1, id);
-
-					r = 3;
-				}
-
-			}
-			else if (r == 3) {
-				if (centerX + 1 == gridW) {
-					break;
-				}
-
-				bool b0 = grid[centerX][centerY + 1].enabled;
-				bool b1 = grid[centerX + 1][centerY + 1].enabled;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX - 1, centerY + 1);
-
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r--;
-				}
-			}
-			else if (r == 2) {
-				if (centerY == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX + 1][centerY].enabled;
-				bool b1 = grid[centerX + 1][centerY - 1].enabled;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX + 1, centerY + 1);
-
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX + 1, centerY - 1, id);
-
-					r--;
-				}
-			}
-			else if (r == 1) {
-				if (centerX == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX][centerY - 1].enabled;
-				bool b1 = grid[centerX - 1][centerY - 1].enabled;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY - 1);
-					deletePiece(centerX, centerY + 1);
-
-					makePiece(centerX - 1, centerY - 1, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-
-					r--;
-				}
-			}
-			break;
-		}
 		case J:
-		{
-			if (r == 0) {
-				if (centerY + 1 == gridH) {
-					break;
-				}
-
-				bool b0 = grid[centerX][centerY - 1].enabled;
-				bool b1 = grid[centerX][centerY + 1].enabled;
-				bool b2 = grid[centerX - 1][centerY + 1].enabled;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY - 1);
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX + 1, centerY);
-
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY + 1, id);
-
-					r = 3;
-				}
-			}
-			else if (r == 3) {
-				if (centerX + 1 == gridW) {
-					break;
-				}
-
-				bool b0 = grid[centerX - 1][centerY].enabled;
-				bool b1 = grid[centerX + 1][centerY].enabled;
-				bool b2 = grid[centerX + 1][centerY + 1].enabled;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX - 1, centerY + 1);
-
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r--;
-				}
-			}
-			else if (r == 2) {
-				if (centerY == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX][centerY + 1].enabled;
-				bool b1 = grid[centerX][centerY - 1].enabled;
-				bool b2 = grid[centerX + 1][centerY - 1].enabled;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX + 1, centerY + 1);
-
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX + 1, centerY - 1, id);
-
-					r--;
-				}
-			}
-			else if (r == 1) {
-				if (centerX == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX + 1][centerY].enabled;
-				bool b1 = grid[centerX - 1][centerY].enabled;
-				bool b2 = grid[centerX - 1][centerY - 1].enabled;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY - 1);
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX, centerY + 1);
-
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX - 1, centerY - 1, id);
-
-					r--;
-				}
-			}
-			break;
-		}
 		case L:
 		{
-			if (r == 0) {
-				if (centerY + 1 == gridH) {
-					break;
+			if (checkIfPieceFits(p, centerX, centerY, nextRot)) 
+			{
+				if (!pieceMoved) {
+					pieceMoved = true;
+					setNextGrid();
 				}
 
-				bool b0 = grid[centerX][centerY + 1].enabled;
-				bool b1 = grid[centerX][centerY - 1].enabled;
-				bool b2 = grid[centerX - 1][centerY - 1].enabled;
+				deleteFullPiece(p, centerX, centerY, r);
+				makeFullPiece(p, centerX, centerY, nextRot);
 
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX + 1, centerY - 1);
-
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX - 1, centerY - 1, id);
-
-					r = 3;
-				}
-			}
-			else if (r == 3) {
-				if (centerX + 1 == gridW) {
-					break;
-				}
-
-				bool b0 = grid[centerX + 1][centerY].enabled;
-				bool b1 = grid[centerX - 1][centerY].enabled;
-				bool b2 = grid[centerX - 1][centerY + 1].enabled;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX - 1, centerY - 1);
-
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX - 1, centerY + 1, id);
-
-					r--;
-				}
-			}
-			else if (r == 2) {
-				if (centerY == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX][centerY - 1].enabled;
-				bool b1 = grid[centerX][centerY + 1].enabled;
-				bool b2 = grid[centerX + 1][centerY + 1].enabled;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX - 1, centerY);
-					deletePiece(centerX - 1, centerY + 1);
-
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r--;
-				}
-			}
-			else if (r == 1) {
-				if (centerX == 0) {
-					break;
-				}
-
-				bool b0 = grid[centerX + 1][centerY - 1].enabled;
-				bool b1 = grid[centerX + 1][centerY].enabled;
-				bool b2 = grid[centerX - 1][centerY].enabled;
-
-				if (!b0 && !b1 && !b2) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX + 1, centerY + 1);
-
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX + 1, centerY - 1, id);
-
-					r--;
-				}
+				r = nextRot;
 			}
 			break;
 		}
+		default: break;
 	}
 }
 
@@ -1780,7 +1424,8 @@ void drawBoundaries() {
 	int gameHeight = (boxH * (gridH + 1));
 
 	offsetX = (monitorW - gameWidth) / (2);
-	offsetY = (monitorH - gameHeight) / (2);
+	//offsetY = (monitorH - gameHeight) / (2);
+	offsetY = 1;
 
 	offsetHoldingX = (offsetX - holdingBoxW - boxW);
 	offsetHoldingY = (offsetY + 1);
@@ -2057,80 +1702,36 @@ void updateGrid() {
 	}
 }
 
-bool movePieceRight() {
-	// check if the piece can move right
-	bool canMove = true;
+void movePieceRight() {
 
-	for (int x = 0; x < gridW; x++) {
-		for (int y = 0; y < gridH; y++) {
-			if (grid[x][y].active) {
-				if (x == gridW - 1) {
-					canMove = false;
-				}
-				else if (grid[x + 1][y].enabled && grid[x + 1][y].ID != grid[x][y].ID) {
-					canMove = false;
-				}
-			}
-		}
-	}
-
-	if (canMove) {
-		centerX++;
+	if (checkIfPieceFits(p, centerX + 1, centerY, r)) {
+		//centerX++;
 
 		if (!pieceMoved) {
 			pieceMoved = true;
 			setNextGrid();
 		}
 
-		for (int x = gridW - 1; x >= 0; x--) {
-			for (int y = 0; y < gridH; y++) {
-				if (grid[x][y].active) {
-					makePiece(x + 1, y, grid[x][y].ID);
-					deletePiece(x, y);
-				}
-			}
-		}
-	}
+		deleteFullPiece(p, centerX, centerY, r);
+		makeFullPiece(p, centerX + 1, centerY, r);
 
-	return canMove;
+		centerX++;
+	}
 }
 
-bool movePieceLeft() {
-	// check if the piece can move right
-	bool canMove = true;
-
-	for (int x = 0; x < gridW; x++) {
-		for (int y = 0; y < gridH; y++) {
-			if (grid[x][y].active) {
-				if (x == 0) {
-					canMove = false;
-				}
-				else if (grid[x - 1][y].enabled && grid[x - 1][y].ID != grid[x][y].ID) {
-					canMove = false;
-				}
-			}
-		}
-	}
-
-	if (canMove) {
-		centerX--;
+void movePieceLeft() {
+	if (checkIfPieceFits(p, centerX - 1, centerY, r)) {
 
 		if (!pieceMoved) {
 			pieceMoved = true;
 			setNextGrid();
 		}
 
-		for (int x = 0; x < gridW; x++) {
-			for (int y = 0; y < gridH; y++) {
-				if (grid[x][y].active) {
-					makePiece(x - 1, y, grid[x][y].ID);
-					deletePiece(x, y);
-				}
-			}
-		}
-	}
+		deleteFullPiece(p, centerX, centerY, r);
+		makeFullPiece(p, centerX - 1, centerY, r);
 
-	return canMove;
+		centerX--;
+	}
 }
 
 void setPiece() {
@@ -2227,7 +1828,7 @@ void setPiece() {
 
 	updateText();
 
-	createPiece(pieceQueue[0]);
+	//createPiece(pieceQueue[0]);
 
 	piece newP = randomPiece();
 
@@ -2257,10 +1858,10 @@ void createPiece(piece x) {
 	r = 0;
 	pieceSet = false;
 	updatedHoldingPiece = false;
+	p = x;
 
 	switch (x) {
 	case I: // I
-		p = I;
 		centerX = 4;
 		centerY = 0;
 		//setConsoleColor(CYAN);
@@ -2271,8 +1872,7 @@ void createPiece(piece x) {
 		break;
 
 	case O: // O
-		p = O;
-		centerX = 0;
+		centerX = 4;
 		centerY = 0;
 		//setConsoleColor(YELLOW);
 
@@ -2284,7 +1884,6 @@ void createPiece(piece x) {
 		break;
 
 	case T: // T
-		p = T;
 		centerX = 5;
 		centerY = 1;
 
@@ -2297,7 +1896,6 @@ void createPiece(piece x) {
 		break;
 
 	case S: // S
-		p = S;
 		centerX = 5;
 		centerY = 1;
 		//setConsoleColor(GREEN);
@@ -2309,7 +1907,6 @@ void createPiece(piece x) {
 		break;
 
 	case Z: // Z 
-		p = Z;
 		centerX = 5;
 		centerY = 1;
 		//setConsoleColor(RED);
@@ -2321,7 +1918,6 @@ void createPiece(piece x) {
 		break;
 
 	case J: // J 
-		p = J;
 		centerX = 5;
 		centerY = 1;
 		//setConsoleColor(BLUE);
@@ -2333,7 +1929,6 @@ void createPiece(piece x) {
 		break;
 
 	case L: // L
-		p = L;
 		centerX = 5;
 		centerY = 1;
 		//setConsoleColor(GRAY);
@@ -2402,21 +1997,18 @@ void eraseBox(int x, int y) {
 	}
 }
 
-void setCursorPos(int x, int y)
-{
+void setCursorPos(int x, int y) {
 	std::cout.flush();
 	COORD coord = { (SHORT)x, (SHORT)y };
 	SetConsoleCursorPosition(hOut, coord);
 }
 
-void setConsoleColor(unsigned short colour)
-{
+void setConsoleColor(unsigned short colour) {
 	std::cout.flush();
 	SetConsoleTextAttribute(hOut, colour);
 }
 
-void showConsoleCursor(bool showFlag)
-{
+void showConsoleCursor(bool showFlag) {
 	CONSOLE_CURSOR_INFO     cursorInfo;
 
 	GetConsoleCursorInfo(hOut, &cursorInfo);
@@ -2424,8 +2016,7 @@ void showConsoleCursor(bool showFlag)
 	SetConsoleCursorInfo(hOut, &cursorInfo);
 }
 
-void cls()
-{
+void cls() {
 
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD topLeft = { 0, 0 };
