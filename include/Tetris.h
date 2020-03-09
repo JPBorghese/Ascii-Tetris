@@ -22,6 +22,8 @@ struct tile {
 
 unsigned short randColor();
 unsigned short idToColor(int);
+void makeFullPiece(piece, int, int, int);		// makeFullPiece(pieceType, posx, posy, rotation)
+void deleteFullPiece(piece, int, int, int);
 void printUpdatedGrid();
 void printFullGrid();
 void showConsoleCursor(bool);
@@ -48,7 +50,5 @@ bool getInput(input*);
 bool movePieceRight();
 bool movePieceLeft();
 bool checkIfPieceFits(piece, int, int, int);	// checkIfPiecefits(pieceType, posx, posy, roation) function
-void makeFullPiece(piece, int, int, int);		// makeFullPiece(pieceType, posx, posy, rotation)
-void deleteFullPiece(piece, int, int, int);
 piece randomPiece();
 

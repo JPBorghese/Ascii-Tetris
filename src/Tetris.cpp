@@ -30,7 +30,7 @@ const int boxW = 5;
 const int boxH = 2;
 const int gridW = 10; // the width of the grid (grid)
 const int gridH = 23;
-const int holdingBoxW = (boxW * 4) + 4; // the widht of the holding box (spaces)
+const int holdingBoxW = (boxW * 4) + 4; // the width of the holding box (spaces)
 const int holdingBoxH = (boxH * 4);
 const int queueBoxW = holdingBoxW;
 const int queueBoxH = holdingBoxH * queueLength;
@@ -256,18 +256,16 @@ int main()
 	return 0;
 }
 
-bool checkIfPieceFits(piece p, int x, int y, int rot) {	
+bool checkIfPieceFits(piece p0, int x, int y, int rot) {	
 
 	if (x < 0 || x >= gridW || y < 0 || y >= gridH) { return false; }
 
 	bool b0, b1, b2, b3;
 
-	//b0 = grid[x][y].enabled;
-	b0 = false;
+	b0 = grid[x][y].enabled && grid[x][y].ID != ACTIVE;
 
-	switch(p) {
+	switch(p0) {
 		case I: {
-
 			switch(rot) {
 				case 0:
 				{
@@ -275,10 +273,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 						return false;
 					}
 
-					// Checkng if the next pieces are open or not
-					b1 = grid[x - 1][y].enabled;
-					b2 = grid[x + 1][y].enabled;
-					b3 = grid[x + 2][y].enabled;
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 2][y].enabled && grid[x + 2][y].ID != ACTIVE;
 
 					break;
 				}
@@ -289,9 +286,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 						return false;
 					}
 
-					b1 = grid[x][y - 1].enabled;
-					b2 = grid[x][y + 1].enabled;
-					b3 = grid[x][y + 2].enabled;
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x][y + 2].enabled && grid[x][y + 2].ID != ACTIVE;
 
 					break;
 				}
@@ -302,9 +299,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 						return false;
 					}
 
-					b1 = grid[x + 1][y].enabled;
-					b2 = grid[x - 1][y].enabled;
-					b3 = grid[x - 2][y].enabled;
+					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b2 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b3 = grid[x - 2][y].enabled && grid[x - 2][y].ID != ACTIVE;
 
 					break;
 				}
@@ -315,9 +312,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 						return false; 
 					}
 
-					b1 = grid[x][y + 1].enabled;
-					b2 = grid[x][y - 1].enabled;
-					b3 = grid[x][y - 2].enabled;
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x][y - 2].enabled && grid[x][y - 2].ID != ACTIVE;
 
 					break;
 				}
@@ -329,7 +326,7 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 			break;
 		}
 		case O: {
-			switch(r) {
+			switch(rot) {
 				case 0:
 				case 1:
 				case 2:
@@ -338,6 +335,11 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 					if (x + 1 >= gridW || y + 1 >= gridH) { 
 						return false; 
 					}
+
+					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
+					b3 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+
 					return true;
 				}
 
@@ -353,9 +355,11 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
 
-					b1 = grid[x - 1][y].enabled;
-					b2 = grid[x + 1][y].enabled;
-					b3 = grid[x][y - 1].enabled;
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+
+					//printf("%d, %d, %d, %d", rot, b1, b2, b3);
 
 					break;
 				}
@@ -364,9 +368,11 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (y - 1 < 0 || y + 1 >= gridH || x + 1 >= gridW) { return false; }
 
-					b1 = grid[x][y - 1].enabled;
-					b2 = grid[x][y + 1].enabled;
-					b3 = grid[x + 1][y].enabled;
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+
+					//printf("%d, %d, %d, %d", rot, b1, b2, b3);
 
 					break;
 				}
@@ -375,9 +381,11 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x - 1][y].enabled;
-					b2 = grid[x + 1][y].enabled;
-					b3 = grid[x][y + 1].enabled;
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+
+					//printf("%d, %d, %d, %d", rot, b1, b2, b3);
 
 					break;
 				}
@@ -386,9 +394,11 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (y - 1 < 0 || y + 1 >= gridH || x - 1 < 0) { return false; }
 
-					b1 = grid[x][y - 1].enabled;
-					b2 = grid[x][y + 1].enabled;
-					b3 = grid[x - 1][y].enabled;
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+
+					//printf("%d, %d, %d, %d", rot, b1, b2, b3);
 
 					break;
 				}
@@ -399,49 +409,48 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 
 			break;
 		}
-		case S:
-		{
+		case S: {
 			switch(rot) {
 				case 0:
 				{
-					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
 
-					b1 = grid[x - 1][y].enabled;
-					b2 = grid[x][y - 1].enabled;
-					b3 = grid[x + 1][y - 1].enabled;
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x + 1][y - 1].enabled && grid[x + 1][y - 1].ID != ACTIVE;
 
 					break;
 				}
 
 				case 1:
 				{
-					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x][y - 1].enabled;
-					b2 = grid[x + 1][y].enabled;
-					b3 = grid[x + 1][y + 1].enabled;
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
 
 					break;
 				}
 
 				case 2:
 				{
-					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x + 1][y].enabled;
-					b2 = grid[x][y + 1].enabled;
-					b3 = grid[x - 1][y + 1].enabled;
+					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x - 1][y + 1].enabled && grid[x - 1][y + 1].ID != ACTIVE;
 
 					break;
 				}
 
 				case 3:
 				{
-					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
+					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x][y + 1].enabled;
-					b2 = grid[x - 1][y].enabled;
-					b3 = grid[x - 1][y - 1].enabled;
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b3 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
 
 					break;
 				}
@@ -457,9 +466,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
 
-					b0 = grid[x - 1][y - 1].enabled;
-					b1 = grid[x][y - 1].enabled;
-					b2 = grid[x + 1][y].enabled;
+					b1 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
 
 					break;
 				}
@@ -467,9 +476,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
 
-					b0 = grid[x][y + 1].enabled;
-					b1 = grid[x + 1][y].enabled;
-					b2 = grid[x + 1][y - 1].enabled;
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 1][y - 1].enabled && grid[x + 1][y - 1].ID != ACTIVE;
 
 					break;
 				}
@@ -477,9 +486,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x - 1][y].enabled;
-					b2 = grid[x][y + 1].enabled;
-					b3 = grid[x + 1][y + 1].enabled;
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
 
 					break;
 				}
@@ -487,9 +496,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
 
-					b0 = grid[x - 1][y - 1].enabled;
-					b1 = grid[x - 1][y].enabled;
-					b2 = grid[x][y - 1].enabled;
+					b1 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
+					b2 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b3 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
 
 					break;
 				}
@@ -505,40 +514,36 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
 
-					b1 = grid[x - 1][y].enabled;
-					b2 = grid[x - 1][y - 1].enabled;
-					b3 = grid[x + 1][y].enabled;
-
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
+					b3 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
 					break;
 				}
 				case 1:
 				{
 					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x][y + 1].enabled;
-					b2 = grid[x][y - 1].enabled;
-					b3 = grid[x + 1][y - 1].enabled;
-
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x + 1][y - 1].enabled && grid[x + 1][y - 1].ID != ACTIVE;
 					break;
 				}
 				case 2:
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x - 1][y].enabled;
-					b2 = grid[x + 1][y].enabled;
-					b3 = grid[x + 1][y + 1].enabled;
-
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
 					break;
 				}
 				case 3:
 				{
 					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x][y - 1].enabled;
-					b2 = grid[x][y + 1].enabled;
-					b3 = grid[x - 1][y + 1].enabled;
-
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x - 1][y + 1].enabled && grid[x - 1][y + 1].ID != ACTIVE;
 					break;
 				}
 
@@ -554,10 +559,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y - 1 < 0) { return false; }
 
-					b1 = grid[x - 1][y].enabled;
-					b2 = grid[x + 1][y].enabled;
-					b3 = grid[x + 1][y - 1].enabled;
-
+					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b3 = grid[x + 1][y - 1].enabled && grid[x + 1][y - 1].ID != ACTIVE;
 					break;
 				}
 
@@ -565,10 +569,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x + 1 >= gridW || y - 1 < 0 || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x][y - 1].enabled;
-					b2 = grid[x][y + 1].enabled;
-					b3 = grid[x + 1][y + 1].enabled;
-
+					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b3 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
 					break;
 				}
 
@@ -576,10 +579,9 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x - 1 < 0 || x + 1 >= gridW || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x + 1][y].enabled;
-					b2 = grid[x - 1][y].enabled;
-					b3 = grid[x - 1][y + 1].enabled;
-
+					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
+					b2 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
+					b3 = grid[x - 1][y + 1].enabled && grid[x - 1][y + 1].ID != ACTIVE;
 					break;
 				}
 
@@ -587,30 +589,31 @@ bool checkIfPieceFits(piece p, int x, int y, int rot) {
 				{
 					if (x - 1 < 0 || y - 1 < 0 || y + 1 >= gridH) { return false; }
 
-					b1 = grid[x][y + 1].enabled;
-					b2 = grid[x][y - 1].enabled;
-					b3 = grid[x - 1][y - 1].enabled;
-
+					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
+					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
+					b3 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
 					break;
 				}
 				default:
 					return false;
+					break;
 			}
-
 			break;
 		}
 		default:
 			return false;
+			break;
 	}
+	//printf("%d", !b1 && !b2 && !b3);
 
-	return !b0 & !b1 & !b2 & !b3;
+	return !b1 & !b2 & !b3;
 }
 
-void makeFullPiece(piece p, int x, int y, int rot) {
+void makeFullPiece(piece p0, int x, int y, int rot) {
 
 	piece id = ACTIVE;
 
-	switch(p) {
+	switch(p0) {
 		case I: {
 			switch(rot) {
 				case 0: {
@@ -634,7 +637,7 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 					makePiece(x - 2, y, id);
 					break;
 				}
-				case 4: {
+				case 3: {
 					makePiece(x, y + 1, id);
 					makePiece(x, y, id);
 					makePiece(x, y - 1, id);
@@ -643,8 +646,8 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 				}
 				default:{
 					return;
+					break;
 				}
-				break;
 			}
 			break;
 		}
@@ -678,7 +681,7 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 					makePiece(x, y + 1, id);
 					break;
 				}
-				case 4: {
+				case 3: {
 					makePiece(x - 1, y, id);
 					makePiece(x, y, id);
 					makePiece(x, y- 1, id);
@@ -687,6 +690,7 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 				}
 				default: {
 					return;
+					break;
 				}
 			}
 			break;
@@ -715,7 +719,7 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 					makePiece(x - 1, y + 1, id);
 					break;
 				}
-				case 4: {
+				case 3: {
 					makePiece(x - 1, y - 1, id);
 					makePiece(x - 1, y, id);
 					makePiece(x, y, id);
@@ -723,9 +727,12 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 					break;
 
 				}
-				default:
+				default: {
 					return;
+					break;
+				}
 			}
+			break;
 		}
 		case Z: {
 			switch(rot) {
@@ -750,7 +757,7 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 					makePiece(x + 1, y + 1, id);
 					break;
 				}
-				case 4: {
+				case 3: {
 					makePiece(x, y - 1, id);
 					makePiece(x, y, id);
 					makePiece(x - 1, y, id);
@@ -759,7 +766,9 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 				}
 				default:
 					return;
+					break;
 			}
+			break;
 		}
 		case J: {
 			switch(rot) {
@@ -784,7 +793,7 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 					makePiece(x + 1, y + 1, id);
 					break;
 				}
-				case 4: {
+				case 3: {
 					makePiece(x, y - 1, id);
 					makePiece(x, y, id);
 					makePiece(x, y + 1, id);
@@ -793,7 +802,9 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 				}
 				default:
 					return;
+					break;
 			}
+			break;
 		}
 		case L: {
 			switch(rot) {
@@ -802,29 +813,36 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 					makePiece(x, y, id);
 					makePiece(x + 1, y, id);
 					makePiece(x + 1, y - 1, id);
+					break;
 				}
 				case 1: {
 					makePiece(x, y - 1, id);
 					makePiece(x, y, id);
 					makePiece(x, y + 1, id);
 					makePiece(x + 1, y + 1, id);
+					break;
 				}
 				case 2: {
 					makePiece(x + 1, y, id);
 					makePiece(x, y, id);
 					makePiece(x - 1, y, id);
 					makePiece(x - 1, y + 1, id);
+					break;
 				}
-				case 4: {
+				case 3: {
 					makePiece(x, y + 1, id);
 					makePiece(x, y, id);
 					makePiece(x, y - 1, id);
 					makePiece(x - 1, y - 1, id);
+					break;
 				}
 				default:
 					return;
+					break;
 			}
+			break;
 		}
+
 		default: {
 			printf("makeFullPiece() function weird piece: %d", p);
 			break;
@@ -832,9 +850,9 @@ void makeFullPiece(piece p, int x, int y, int rot) {
 	}
 }
 
-void deleteFullPiece(piece p, int x, int y, int rot) {
+void deleteFullPiece(piece p0, int x, int y, int rot) {
 
-	switch(p) {
+	switch(p0) {
 		case I: {
 			switch(rot) {
 				case 0: {
@@ -858,7 +876,7 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 					deletePiece(x - 2, y);
 					break;
 				}
-				case 4: {
+				case 3: {
 					deletePiece(x, y + 1);
 					deletePiece(x, y);
 					deletePiece(x, y - 1);
@@ -902,7 +920,7 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 					deletePiece(x, y + 1);
 					break;
 				}
-				case 4: {
+				case 3: {
 					deletePiece(x - 1, y);
 					deletePiece(x, y);
 					deletePiece(x, y- 1);
@@ -930,7 +948,6 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 					deletePiece(x + 1, y);
 					deletePiece(x + 1, y + 1);
 					break;
-
 				}
 				case 2: {
 					deletePiece(x + 1, y);
@@ -939,7 +956,7 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 					deletePiece(x - 1, y + 1);
 					break;
 				}
-				case 4: {
+				case 3: {
 					deletePiece(x - 1, y - 1);
 					deletePiece(x - 1, y);
 					deletePiece(x, y);
@@ -947,9 +964,11 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 					break;
 
 				}
-				default:
+				default: {
 					return;
+				}
 			}
+			break;
 		}
 		case Z: {
 			switch(rot) {
@@ -974,7 +993,7 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 					deletePiece(x + 1, y + 1);
 					break;
 				}
-				case 4: {
+				case 3: {
 					deletePiece(x, y - 1);
 					deletePiece(x, y);
 					deletePiece(x - 1, y);
@@ -984,6 +1003,7 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 				default:
 					return;
 			}
+			break;
 		}
 		case J: {
 			switch(rot) {
@@ -1008,7 +1028,7 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 					deletePiece(x + 1, y + 1);
 					break;
 				}
-				case 4: {
+				case 3: {
 					deletePiece(x, y - 1);
 					deletePiece(x, y);
 					deletePiece(x, y + 1);
@@ -1018,6 +1038,7 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 				default:
 					return;
 			}
+			break;
 		}
 		case L: {
 			switch(rot) {
@@ -1026,28 +1047,34 @@ void deleteFullPiece(piece p, int x, int y, int rot) {
 					deletePiece(x, y);
 					deletePiece(x + 1, y);
 					deletePiece(x + 1, y - 1);
+					break;
 				}
 				case 1: {
 					deletePiece(x, y - 1);
 					deletePiece(x, y);
 					deletePiece(x, y + 1);
 					deletePiece(x + 1, y + 1);
+					break;
 				}
 				case 2: {
 					deletePiece(x + 1, y);
 					deletePiece(x, y);
 					deletePiece(x - 1, y);
 					deletePiece(x - 1, y + 1);
+					break;
 				}
-				case 4: {
+				case 3: {
 					deletePiece(x, y + 1);
 					deletePiece(x, y);
 					deletePiece(x, y - 1);
 					deletePiece(x - 1, y - 1);
+					break;
 				}
-				default:
+				default: 
 					return;
+					break;
 			}
+			break;
 		}
 		default: {
 			printf("makeFullPiece() function weird piece: %d", p);
@@ -1203,274 +1230,109 @@ void rotatePieceCW() {
 	}
 
 	piece id = ACTIVE;
+	int nextRot = (r + 1) % 4;
 
 	switch (p) {
-		case I:
-		{
+		case I: {
 			if (r == 0) {
-				if (checkIfPieceFits(p, centerX + 1, centerY, r + 1)) {
+				if (checkIfPieceFits(p, centerX + 1, centerY, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
 					deleteFullPiece(p, centerX, centerY, r);
-					makeFullPiece(p, centerX + 1, centerY, r + 1);
+					makeFullPiece(p, centerX + 1, centerY, nextRot);
 
-					r++;
+					r = nextRot;
 					centerX++;
 				}
 			}
 			else if (r == 1) {	// RIGHT
-				if (checkIfPieceFits(p, centerX, centerY + 1, r + 1)) {
+				if (checkIfPieceFits(p, centerX, centerY + 1, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
 					deleteFullPiece(p, centerX, centerY, r);
-					makeFullPiece(p, centerX, centerY + 1, r + 1);
+					makeFullPiece(p, centerX, centerY + 1, nextRot);
 
-					r++;
+					r = nextRot;
 					centerY++;
 				}
 			}
 			else if (r == 2) {	// DOWN
-				if (checkIfPieceFits(p, centerX - 1, centerY, r + 1)) {
+				if (checkIfPieceFits(p, centerX - 1, centerY, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
 					deleteFullPiece(p, centerX, centerY, r);
-					makeFullPiece(p, centerX - 1, centerY, r + 1);
+					makeFullPiece(p, centerX - 1, centerY, nextRot);
 
-					r++;
+					r = nextRot;
 					centerX--;
 				}
 			}
 			else if (r == 3) {	// LEFT
-				if (checkIfPieceFits(p, centerX, centerY - 1, (r + 1) % 4)) {
+				if (checkIfPieceFits(p, centerX, centerY - 1, nextRot)) {
 					if (!pieceMoved) {
 						pieceMoved = true;
 						setNextGrid();
 					}
 
 					deleteFullPiece(p, centerX, centerY, r);
-					makeFullPiece(p, centerX, centerY - 1, 0);
+					makeFullPiece(p, centerX, centerY - 1, nextRot);
 
-					r = 0;
+					r = nextRot;
 					centerY--;
 				}
 			}
 			break;
 		}
-		case O:
-		{
+		case O: {
 			return;
 		}
-		case T:
-		{
-			if (r == 0) {
-				if (checkIfPieceFits(p, centerX, centerY, r + 1)) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX - 1, centerY);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX + 1, centerY, id);
-
-					r++;
-				}
-			}
-			else if (r == 1) {
-				if (centerX == 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 2) {
-				if (centerY == 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY - 1].enabled && grid[centerX][centerY - 1].ID != id;
-
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY, id);
-
-					r++;
-				}
-			}
-			else if (r == 3) {
-				// Checking if the next piece positionin bounds
-				if (centerX == gridW - 1) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-
-				if (!b0) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY + 1);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-
-					r = 0;
-				}
-			}
-			break;
-		}
+		case T: 
 		case S:
+		case Z:
+		case J:
+		case L:
 		{
-			if (r == 0) {
-				if (centerY + 1 == gridH) {
-					break;
+			if (checkIfPieceFits(p, centerX, centerY, nextRot)) 
+			{
+				if (!pieceMoved) {
+					pieceMoved = true;
+					setNextGrid();
 				}
 
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX + 1][centerY].enabled && grid[centerX + 1][centerY].ID != id;
-				bool b1 = grid[centerX + 1][centerY + 1].enabled && grid[centerX + 1][centerY + 1].ID != id;
+				deleteFullPiece(p, centerX, centerY, r);
+				makeFullPiece(p, centerX, centerY, nextRot);
 
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY - 1);
-					deletePiece(centerX - 1, centerY);
-				
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX + 1, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 1) {
-				if (centerX - 1 < 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-				bool b1 = grid[centerX - 1][centerY + 1].enabled && grid[centerX - 1][centerY + 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY - 1);
-					deletePiece(centerX + 1, centerY + 1);
-
-					makePiece(centerX, centerY, id);
-					makePiece(centerX + 1, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY + 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 2) {
-				if (centerY - 1 < 0) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX - 1][centerY].enabled && grid[centerX - 1][centerY].ID != id;
-				bool b1 = grid[centerX - 1][centerY - 1].enabled && grid[centerX - 1][centerY - 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX + 1, centerY);
-					deletePiece(centerX - 1, centerY + 1);
-
-					makePiece(centerX, centerY, id);
-					makePiece(centerX, centerY + 1, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX - 1, centerY - 1, id);
-
-					r++;
-				}
-			}
-			else if (r == 3) {
-				if (centerX + 1 >= gridW) {
-					break;
-				}
-
-				// Checkng if the next pieces are open or not
-				bool b0 = grid[centerX][centerY + 1].enabled && grid[centerX][centerY + 1].ID != id;
-				bool b1 = grid[centerX - 1][centerY - 1].enabled && grid[centerX - 1][centerY - 1].ID != id;
-
-				if (!b0 && !b1) {
-					if (!pieceMoved) {
-						pieceMoved = true;
-						setNextGrid();
-					}
-
-					deletePiece(centerX, centerY + 1);
-					deletePiece(centerX - 1, centerY - 1);
-
-					makePiece(centerX, centerY, id);
-					makePiece(centerX - 1, centerY, id);
-					makePiece(centerX, centerY - 1, id);
-					makePiece(centerX + 1, centerY - 1, id);
-
-					r = 0;
-				}
+				r = nextRot;
 			}
 			break;
 		}
-		case Z:
-		{
+		default: break;
+		/*
+		case S: {
+			if (checkIfPieceFits(p, centerX, centerY, nextRot)) 
+			{
+				if (!pieceMoved) {
+					pieceMoved = true;
+					setNextGrid();
+				}
+
+				deleteFullPiece(p, centerX, centerY, r);
+				makeFullPiece(p, centerX, centerY, nextRot);
+
+				r = nextRot;
+			}
+			break;
+		}
+		case Z: {
 			if (r == 0) {
 				if (centerY + 1 == gridH) {
 					break;
@@ -1574,8 +1436,7 @@ void rotatePieceCW() {
 			}
 			break;
 		}
-		case J:
-		{
+		case J: {
 			if (r == 0) {
 				if (centerY + 1 == gridH) {
 					break;
@@ -1692,8 +1553,7 @@ void rotatePieceCW() {
 				}
 			}
 		}
-		case L:
-		{
+		case L: {
 			if (r == 0) {
 				if (centerY + 1 == gridH) {
 					break;
@@ -1813,6 +1673,8 @@ void rotatePieceCW() {
 		}
 		default: 
 			break;
+
+			*/
 	}
 }
 
