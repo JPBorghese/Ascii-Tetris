@@ -46,9 +46,10 @@ void rotatePieceCW();
 void rotatePieceCCW();
 void cls();
 void resetInput();
+void movePieceRight();
+void movePieceLeft();
+
 bool getInput(input*);
-bool movePieceRight();
-bool movePieceLeft();
 bool checkIfPieceFits(piece, int, int, int);	// checkIfPiecefits(pieceType, posx, posy, roation) function
 piece randomPiece();
 
