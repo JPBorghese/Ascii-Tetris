@@ -23,6 +23,8 @@ const unsigned short WHITE 			= FOREGROUND_INTENSITY 	| FOREGROUND_RED 	| FOREGR
 
 static const HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
+const int horizontalSpeed = 12;
+//const int rotateSpeed = 20;
 const int queueLength = 3;
 const int charPixelSizeH = 14;
 const int charPixelSizeW = 7;
@@ -80,7 +82,6 @@ clock_t endTime;
 int main()
 {
 	ShowWindow(GetConsoleWindow(), SW_MAXIMIZE);	// fullscreen
-	//SetWindowPos(GetConsoleWindow(), HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW);	// sets window pos
 	showConsoleCursor(false);	// hides cursor
 
 	srand(unsigned int(time(NULL)));			// randomizes rand
@@ -125,6 +126,9 @@ int main()
 	createPiece(randomPiece());
 	getInput(&i);
 
+	bool leftTimer = true;
+	bool rightTimer = true;
+
 	while (true) {
 
 		startTime = clock();
@@ -142,13 +146,39 @@ int main()
 				rotatePieceCCW();
 		}
 
+		if (holdingUp) {	// insta set piece
+
+			if (!pieceMoved) {
+				pieceMoved = true;
+				setNextGrid();
+			}
+			
+			int temp = 1;
+			while(checkIfPieceFits(p, centerX, centerY + temp, r)) {
+				temp++;
+			}
+
+			//printf("%d, %d, %d, %d", p, centerX, centerY + temp - 1, r);
+
+			deleteFullPiece(p, centerX, centerY, r);
+			makeFullPiece(p, centerX, centerY + temp - 1, r);
+
+			setPiece();
+		}
+
 		if (i != NONE) {
 			switch (i) {
 			case LEFT:
-				movePieceLeft();
+				if (leftTimer) {
+					movePieceLeft();
+					leftTimer = false;
+				}
 				break;
 			case RIGHT:
-				movePieceRight();
+				if (rightTimer) {
+					movePieceRight();
+					rightTimer = false;
+				}
 				break;
 			case END:
 				endGame = true;
@@ -157,6 +187,7 @@ int main()
 				cls();
 				goto START;
 				break;
+				/*
 			case ONE:	// I
 				//drawHoldingPiece(p, I);
 				createPiece(I);
@@ -185,8 +216,15 @@ int main()
 				//drawHoldingPiece(p, L);
 				createPiece(L);
 				break;
+
+				*/
 			}
 		} 
+
+		if (timer % horizontalSpeed == 0) {	// resets value that determies if piece can move left or right
+			leftTimer = true;
+			rightTimer = true;
+		}
 		
 		if (timer % actualSpeed == 0) {
 			updateGrid();
@@ -251,7 +289,7 @@ int main()
 	}
 
 	cout.flush();
-	cout << "Game Over";
+	printf("Game Over");
 
 	return 0;
 }
@@ -276,7 +314,6 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 					b1 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
 					b2 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
 					b3 = grid[x + 2][y].enabled && grid[x + 2][y].ID != ACTIVE;
-
 					break;
 				}
 
@@ -289,7 +326,6 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 					b1 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
 					b2 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
 					b3 = grid[x][y + 2].enabled && grid[x][y + 2].ID != ACTIVE;
-
 					break;
 				}
 
@@ -302,7 +338,6 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
 					b2 = grid[x - 1][y].enabled && grid[x - 1][y].ID != ACTIVE;
 					b3 = grid[x - 2][y].enabled && grid[x - 2][y].ID != ACTIVE;
-
 					break;
 				}
 
@@ -315,7 +350,6 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 					b1 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
 					b2 = grid[x][y - 1].enabled && grid[x][y - 1].ID != ACTIVE;
 					b3 = grid[x][y - 2].enabled && grid[x][y - 2].ID != ACTIVE;
-
 					break;
 				}
 
@@ -339,14 +373,14 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 					b1 = grid[x + 1][y].enabled && grid[x + 1][y].ID != ACTIVE;
 					b2 = grid[x + 1][y + 1].enabled && grid[x + 1][y + 1].ID != ACTIVE;
 					b3 = grid[x][y + 1].enabled && grid[x][y + 1].ID != ACTIVE;
-
-					return true;
+					break;
 				}
 
-				default:
+				default: {
 					return false;
+					break;
+				}
 			}
-
 			break;
 		}
 		case T: {
@@ -403,10 +437,11 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 					break;
 				}
 
-				default:
+				default: {
 					return false;
+					break;
+				}
 			}
-
 			break;
 		}
 		case S: {
@@ -455,8 +490,10 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 					break;
 				}
 
-				default:
+				default: {
 					return false;
+					break;
+				}
 			}
 			break;
 		}
@@ -502,10 +539,11 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 
 					break;
 				}
-				default:
+				default: {
 					return false;
+					break;
+				}
 			}
-
 			break;
 		}
 		case J: {
@@ -547,10 +585,11 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 					break;
 				}
 
-				default:
+				default: {
 					return false;
+					break;
+				}
 			}
-
 			break;
 		}
 		case L: {
@@ -594,9 +633,10 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 					b3 = grid[x - 1][y - 1].enabled && grid[x - 1][y - 1].ID != ACTIVE;
 					break;
 				}
-				default:
+				default: {
 					return false;
 					break;
+				}
 			}
 			break;
 		}
@@ -604,9 +644,8 @@ bool checkIfPieceFits(piece p0, int x, int y, int rot) {
 			return false;
 			break;
 	}
-	//printf("%d", !b1 && !b2 && !b3);
 
-	return !b1 & !b2 & !b3;
+	return !b0 && !b1 && !b2 && !b3;
 }
 
 void makeFullPiece(piece p0, int x, int y, int rot) {
@@ -1523,18 +1562,18 @@ bool getInput(input* dir) {
 	}
 	
 	if (!rotateCCW) {
-		rotateCCW = GetAsyncKeyState(0x41) & 0x0001;
+		rotateCCW = GetAsyncKeyState(0x5A) & 0x0001;
 	}
 	
 	if (!rotateCW) {
-		rotateCW = GetAsyncKeyState(0x44) & 0x0001;
+		rotateCW = GetAsyncKeyState(0x58) & 0x0001;
 	}
 
 	if (*dir == NONE) {
-		if (GetAsyncKeyState(VK_LEFT) & 0x0001) { // left
+		if (GetAsyncKeyState(VK_LEFT) & 0x8001) { // Z left
 			*dir = LEFT;
 		}
-		else if (GetAsyncKeyState(VK_RIGHT) & 0x0001) { // right
+		else if (GetAsyncKeyState(VK_RIGHT) & 0x8001) { // X
 			*dir = RIGHT;
 		}
 		else if (GetAsyncKeyState(VK_ESCAPE)) {
@@ -1781,6 +1820,7 @@ void setPiece() {
 					}
 				}
 			}
+
 			row++;
 			linesCleared++;
 			linesJustCleared++;
@@ -1828,7 +1868,7 @@ void setPiece() {
 
 	updateText();
 
-	//createPiece(pieceQueue[0]);
+	createPiece(pieceQueue[0]);
 
 	piece newP = randomPiece();
 
